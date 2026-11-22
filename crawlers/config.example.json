@@ -1,0 +1,63 @@
+{
+    "fixindex": {
+        "base_url": "http://127.0.0.1:8000",
+        "api_key": "fx_live_REPLACE_WITH_CONTRIBUTE_AGENT_KEY"
+    },
+    "devices": [
+        {
+            "brand": "Samsung",
+            "model_family": "Galaxy A14",
+            "platform": "Android",
+            "slug": "samsung-galaxy-a14",
+            "aliases": ["A14", "SM-A145", "SM-A146", "a145f", "a146p"],
+            "keywords": ["galaxy a14", "a145", "a146", "گلکسی A14", "ا14"]
+        },
+        {
+            "brand": "Apple",
+            "model_family": "iPhone 13 Pro",
+            "platform": "iOS",
+            "slug": "apple-iphone-13-pro",
+            "aliases": ["ip13p", "A2638", "A2483"],
+            "keywords": ["iphone 13 pro", "13pro", "آیفون 13 پرو"]
+        },
+        {
+            "brand": "Xiaomi",
+            "model_family": "Poco F3",
+            "platform": "Android",
+            "slug": "xiaomi-poco-f3",
+            "aliases": ["M2012K11AG", "M2012K11AI", "M2012K11AC", "alioth", "Redmi K40", "Mi 11X", "پوکو F3"],
+            "keywords": ["poco f3", "redmi k40", "mi 11x", "m2012k11ag", "پوکو f3", "پوکو اف 3"]
+        }
+    ],
+    "telegram": {
+        "api_id": 0,
+        "api_hash": "REPLACE_FROM_my.telegram.org",
+        "phone": "+98XXXXXXXXXX",
+        "session_name": "fixindex_crawler",
+        "groups": [
+            "@example_repair_group",
+            "https://t.me/+InviteHashHere",
+            -1001234567890
+        ],
+        "max_messages_per_group": 500,
+        "min_message_length": 60,
+        "submit_full_cases": true
+    },
+    "youtube": {
+        "results_per_query": 10,
+        "min_duration_seconds": 60,
+        "topics_en": ["no power repair", "dead boot fix", "charging problem", "boot loop", "water damage", "FRP remove", "screen replacement", "no sound mic repair", "audio ic codec", "cpu reball", "no service baseband"],
+        "topics_fa": ["تعمیر خاموشی", "مشکل شارژ", "بوت لوپ", "آب خوردگی", "مشکل صدا و میکروفن", "ریبال سی پی یو", "مشکل آنتن"]
+    },
+    "web": {
+        "request_delay_seconds": 2.0,
+        "seeds": [
+            {
+                "device_slug": "samsung-galaxy-a14",
+                "urls": [
+                    "https://example-repair-forum.com/threads/galaxy-a14-no-power.12345/"
+                ]
+            }
+        ]
+    }
+}

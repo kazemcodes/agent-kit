@@ -1,0 +1,546 @@
+{
+  "schema_version": 1,
+  "device": {
+    "brand": "Xiaomi",
+    "model_family": "Poco F3",
+    "platform": "Android",
+    "slug": "xiaomi-poco-f3",
+    "release_year": 2021,
+    "board_identifier": "M2012K11AG",
+    "aliases": [
+      "M2012K11AG",
+      "M2012K11AI",
+      "M2012K11AC",
+      "alioth",
+      "Redmi K40",
+      "Mi 11X",
+      "پوکو F3",
+      "پوکو اف ۳"
+    ],
+    "specs": {
+      "models_note": "Poco F4 GT",
+      "ram": "K40/Pro/Gaming/40S/Poco F3 : 6, 8 or 12 GB RAM LPDDR5 Poco F3/Mi 11X/Poco F4 : 6 or 8 GB RAM LPDDR5 K40 Pro+ : 12 GB RAM",
+      "storage": "128 or 256 GB UFS 3.1",
+      "battery": "K40/Pro/Pro+/Poco F3: 4520 mAh K40 Gaming: 5065 mAh K40S/Poco F4: 4500 mAh",
+      "display": "6.67 in (169 mm) AMOLED capacitive touchscreen, 1080p 1080 × 2400 pixels (2.5 MP), 20:9 aspect ratio (395 ppi ), 120 Hz refresh rate , HDR10+",
+      "codename": "K40/Poco F3: alioth Mi 11X: aliothin K40 Pro: haydn K40 Pro+/Mi 11i: haydn/haydn",
+      "platform_siblings": "Redmi K40, Mi 11X"
+    },
+    "known_issues": [
+      "Audio HAL lockup, Bluetooth/USB-C routing stuck, or OS mic conflict (Poco F3): If CIT passes hardware loopback in Safe Mode, clear Google app cache/microphone permission, reset audio settings, or reflash matching stock firmware/persist image before opening the chassis.",
+      "Main-to-sub-board interconnect flex cable or bottom charging sub-board fault: Clean and reseat the B2B flex connectors; if corrosion or pin damage is present, replace the charging sub-board and main interconnect flex cable with a known-good assembly.",
+      "Audio Codec / Smart Amplifier BGA dry joint or shorted rail: Clear any shorted decoupling capacitors on codec supply lines; if rails measure clean without shorts, flux and reball or replace the audio codec IC and verify speaker amp continuity.",
+      "SoC / CPU BGA cracked solder joints causing simultaneous audio & mic bus dropout: Lift the stacked RAM and SoC/CPU, wick and clean oxidized pads under the microscope, reball CPU and RAM using fresh leaded solder paste/stencil, and re-seat cleanly."
+    ],
+    "profile": {
+      "verdict": "On Xiaomi Poco F3 (Redmi K40, Mi 11X), simultaneous loss of microphone and sound is usually either a lower sub-board/flex disconnect, an audio codec/rail failure, or cracked BGA joints under the SoC. Always isolate software (CIT *#*#6484#*#*) and the bottom flex before applying hot air to the mainboard.",
+      "overview": "Diagnostic dossier for Xiaomi Poco F3 (platform siblings: Redmi K40, Mi 11X) addressing no sound and microphone not working.\n\nAll findings below link directly to fetched external evidence (Wikipedia, iFixit, repair forums, and technician videos) and remain tagged as agent_draft until reviewed by a human technician.",
+      "failure_modes": [
+        {
+          "title": "Audio HAL lockup, Bluetooth/USB-C routing stuck, or OS mic conflict (Poco F3)",
+          "severity": "occasional",
+          "confidence": "community",
+          "components": [
+            "Audio HAL",
+            "CIT Hardware Menu",
+            "Google App Mic Permission"
+          ],
+          "symptoms": [
+            "Neither loudspeaker media audio nor primary microphone works until reboot (or fails after MIUI/HyperOS update)",
+            "Earphones/Bluetooth state may appear stuck, muting onboard earpiece/speaker and bottom mic",
+            "Voice recorder or dialer hangs when attempting to initialize audio stream"
+          ],
+          "mechanism": "On Qualcomm/Xiaomi devices, an audio HAL deadlock, stuck USB-C/headset detection, or background hotword listener seizing the audio stream prevents both mic capture and speaker output without an actual board short.",
+          "diagnose": [
+            "Disable Bluetooth completely and check the status bar for phantom wired headset icons.",
+            "Open the built-in hardware test (CIT: dial *#*#6484#*#* or tap Kernel Version in Settings) and run Receiver, Speaker, Main Mic, and Top Mic tests separately.",
+            "Boot into Safe Mode or revoke microphone permission from the Google app and test Voice Recorder after a clean restart."
+          ],
+          "fix": "If CIT passes hardware loopback in Safe Mode, clear Google app cache/microphone permission, reset audio settings, or reflash matching stock firmware/persist image before opening the chassis.",
+          "risk": "Do not flash mismatched region firmware or wipe persist partitions without backing up calibration files.",
+          "sources": [
+            "wiki-en-1",
+            "ifixit-ifixit-1",
+            "ifixit-ifixit-2",
+            "ifixit-ifixit-3",
+            "ifixit-ifixit-4"
+          ]
+        },
+        {
+          "title": "Main-to-sub-board interconnect flex cable or bottom charging sub-board fault",
+          "severity": "common",
+          "confidence": "community",
+          "components": [
+            "Main FPC Flex Cable",
+            "Charging Sub-board",
+            "Bottom Primary Mic"
+          ],
+          "symptoms": [
+            "Bottom primary microphone dead on standard calls while loudspeaker or top mic may also cut out",
+            "Fault starts after a drop, chassis flex, or moisture near the USB-C port",
+            "Intermittent audio or mic dropout when pressing near the bottom half of the back cover"
+          ],
+          "mechanism": "The primary voice mic and bottom loudspeaker routes travel through the lower charging sub-board and the main-to-sub flex ribbon. A cracked solder ball under the B2B connector, corroded sub-board pad, or torn flex trace can pull down shared bias or SoundWire/speaker lines.",
+          "diagnose": [
+            "Disconnect the battery first, then disconnect the main-to-sub-board flex cable at the mainboard B2B connector.",
+            "Test whether the top earpiece/speaker and top secondary microphone recover with the lower sub-board isolated.",
+            "Inspect both ends of the flex connector under a microscope for bent pins, corrosion, or micro-cracks."
+          ],
+          "fix": "Clean and reseat the B2B flex connectors; if corrosion or pin damage is present, replace the charging sub-board and main interconnect flex cable with a known-good assembly.",
+          "risk": "Always isolate the battery connector before unplugging or probing board-to-board flex cables to avoid blowing bias or power lines.",
+          "sources": [
+            "ifixit-ifixit-1",
+            "ifixit-ifixit-4",
+            "ifixit-ifixit-6",
+            "wiki-en-1",
+            "ifixit-ifixit-2"
+          ]
+        },
+        {
+          "title": "Audio Codec / Smart Amplifier BGA dry joint or shorted rail",
+          "severity": "common",
+          "confidence": "community",
+          "components": [
+            "Audio Codec IC",
+            "Smart Speaker Amp",
+            "PMIC Audio Rails"
+          ],
+          "symptoms": [
+            "Both microphone input and speaker/earpiece output fail completely in CIT hardware diagnostics",
+            "Sub-board and flex replacement did not restore sound or mic",
+            "Recorder app freezes or returns audio hardware error immediately"
+          ],
+          "mechanism": "The discrete audio codec and smart speaker amplifiers handle ADC/DAC conversion for mics and speaker amplification over I2S/SoundWire and PMIC LDO rails. Drop impact or liquid ingress under the shield fractures BGA joints or shorts decoupling capacitors on codec supply rails.",
+          "diagnose": [
+            "Remove the mainboard shield covering the audio codec and PMIC area and inspect under a microscope for liquid corrosion or cracked underfill.",
+            "Check decoupling capacitors surrounding the audio codec and smart amp in diode mode / resistance for shorts to ground before powering.",
+            "Verify codec clock, SoundWire/I2C control continuity, and LDO bias rails while attempting audio playback/recording."
+          ],
+          "fix": "Clear any shorted decoupling capacitors on codec supply lines; if rails measure clean without shorts, flux and reball or replace the audio codec IC and verify speaker amp continuity.",
+          "risk": "Excessive hot air near shielded/underfilled Qualcomm ICs can float adjacent PMIC or CPU solder balls. Pre-heat evenly and shield surrounding BGA packages.",
+          "sources": [
+            "wiki-en-1",
+            "ifixit-ifixit-4",
+            "yt-d295ysg5c2y",
+            "yt-i9qbtyy2ubu",
+            "yt-twgluxaygig"
+          ]
+        },
+        {
+          "title": "SoC / CPU BGA cracked solder joints causing simultaneous audio & mic bus dropout",
+          "severity": "design-flaw",
+          "confidence": "community",
+          "components": [
+            "SoC / CPU",
+            "LPDDR5 RAM",
+            "PMIC",
+            "CPU BGA"
+          ],
+          "symptoms": [
+            "Sudden simultaneous loss of speaker sound and both microphones (often after heating/gaming or a drop)",
+            "Audio or mic briefly returns when pressing gently on the CPU shield or flexing the board",
+            "Device may also exhibit intermittent freezes, camera errors, or reboots before going dead"
+          ],
+          "mechanism": "On Poco F3 / Redmi K40 / Mi 11X, thermal cycling and board flex fatigue the lead-free BGA solder balls under the stacked SoC/RAM. Because digital audio buses (SoundWire/I2S/Slimbus) route directly from the SoC, cracked balls sever both audio output and microphone paths simultaneously.",
+          "diagnose": [
+            "Rule out software (CIT + Safe Mode), sub-board flex, and codec supply shorts first.",
+            "Perform a careful mechanical pressure check (non-conductive spudger gentle pressure over the CPU area during audio test) — temporary restoration confirms cracked CPU BGA balls.",
+            "Check diode mode on I2S/SoundWire/I2C lines between the audio codec pads and CPU when codec IC is lifted."
+          ],
+          "fix": "Lift the stacked RAM and SoC/CPU, wick and clean oxidized pads under the microscope, reball CPU and RAM using fresh leaded solder paste/stencil, and re-seat cleanly.",
+          "risk": "High-risk micro-soldering: stacked PoP RAM/CPU can delaminate, pop, or tear pads if underfill is not cleared and temperature profile is uncontrolled. Back up customer data before board heat if the phone still boots.",
+          "sources": [
+            "ifixit-ifixit-1",
+            "ifixit-ifixit-2",
+            "ifixit-ifixit-4",
+            "ifixit-ifixit-5",
+            "ifixit-ifixit-6"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "label": "CIT Hardware Menu isolation (*#*#6484#*#*)",
+          "tool": "Android Dialer / CIT",
+          "expect": "Tests Main Mic, Top Mic, Earpiece, and Loudspeaker independently of dialer/third-party apps.",
+          "sources": [
+            "wiki-en-1",
+            "ifixit-ifixit-1"
+          ]
+        },
+        {
+          "label": "Sub-board & interconnect flex isolation",
+          "tool": "Spudger + Microscope",
+          "expect": "Disconnecting the lower sub-board flex separates a shorted bottom mic/USB board from a mainboard audio codec or CPU fault.",
+          "sources": [
+            "ifixit-ifixit-1",
+            "ifixit-ifixit-4"
+          ]
+        },
+        {
+          "label": "Codec & PMIC supply capacitor short check",
+          "tool": "Multimeter (Diode / Ohms)",
+          "expect": "No 0.000V dead shorts on filter caps around the audio codec and smart amp rails; compare against a known-good reference board before reballing.",
+          "sources": [
+            "wiki-en-1",
+            "ifixit-ifixit-4"
+          ]
+        },
+        {
+          "label": "SoC BGA joint integrity test (after ruling out flex & codec)",
+          "tool": "Non-conductive probe / Microscope",
+          "expect": "If light pressure on the SoC briefly restores audio or mic, CPU/RAM BGA reballing is required rather than replacing speakers or mics.",
+          "sources": [
+            "ifixit-ifixit-1",
+            "ifixit-ifixit-2"
+          ]
+        }
+      ],
+      "parts": [
+        {
+          "name": "Main-to-sub-board interconnect flex cable",
+          "type": "Flex",
+          "note": "Low-cost first swap when B2B pins or flex traces are fatigued."
+        },
+        {
+          "name": "Bottom USB-C charging & primary mic sub-board",
+          "type": "Board",
+          "note": "Houses the primary bottom microphone and USB-C port."
+        },
+        {
+          "name": "Audio Codec IC",
+          "type": "IC",
+          "note": "Replace or reball when codec lines are open/shorted or audio fails after sub-board isolation."
+        },
+        {
+          "name": "BGA CPU/RAM Reball Stencil & 183°C Paste",
+          "type": "Consumable",
+          "note": "Required if BGA solder fatigue under the SoC is confirmed."
+        }
+      ],
+      "media": [
+        {
+          "url": "https://www.youtube.com/watch?v=D295ysg5c2Y",
+          "title": "POCO F3 GT Audio IC Circuit Repair | No Sound Problem Fix",
+          "kind": "youtube",
+          "video_id": "D295ysg5c2Y",
+          "channel": "mobilerepair",
+          "duration_seconds": 212,
+          "views": 231,
+          "thumbnail_url": "https://i.ytimg.com/vi/D295ysg5c2Y/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Xiaomi Poco F3 no sound mic not working repair"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BzaX0wfSZCA",
+          "title": "Xiaomi Poco F3 5G não funciona Microfone ViVA Voz - microfone chiando | Como Rssolver",
+          "kind": "youtube",
+          "video_id": "BzaX0wfSZCA",
+          "channel": "MixTudo Assistencia Técnica",
+          "duration_seconds": 1194,
+          "views": 3593,
+          "thumbnail_url": "https://i.ytimg.com/vi/BzaX0wfSZCA/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Xiaomi Poco F3 no sound mic not working repair"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=i9qBtYY2UBU",
+          "title": "Poco F3 Gt No Mic No ear Speak &Ringar Solution  Poco F3 Gt नो माइक नो ईयर स्पीकर और रिंगर सॉल्यूशन",
+          "kind": "youtube",
+          "video_id": "i9qBtYY2UBU",
+          "channel": "AnsaarTech",
+          "duration_seconds": 588,
+          "views": 287,
+          "thumbnail_url": "https://i.ytimg.com/vi/i9qBtYY2UBU/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Xiaomi Poco F3 no sound mic not working repair"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=TwGLuXAygig",
+          "title": "Xiaomi Poco F3 Audio Circuit Repair | No Sound Problem Fix Tutorial",
+          "kind": "youtube",
+          "video_id": "TwGLuXAygig",
+          "channel": "mobilerepair",
+          "duration_seconds": 183,
+          "views": 519,
+          "thumbnail_url": "https://i.ytimg.com/vi/TwGLuXAygig/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Xiaomi Poco F3 no sound mic not working repair"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=mp67uK7mUEk",
+          "title": "Xiomi Poco F3 mic speaker Jumper Ways | Xiomi poco F3 mic speaker Problem Solution",
+          "kind": "youtube",
+          "video_id": "mp67uK7mUEk",
+          "channel": "India Technology",
+          "duration_seconds": 70,
+          "views": 201,
+          "thumbnail_url": "https://i.ytimg.com/vi/mp67uK7mUEk/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Xiaomi Poco F3 no sound mic not working repair"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=0XURT2DMW4E",
+          "title": "Xiaomi redmi K40 mic speaker Jumper Ways | redmi K40 mic speaker Problem Solution",
+          "kind": "youtube",
+          "video_id": "0XURT2DMW4E",
+          "channel": "India Technology",
+          "duration_seconds": 68,
+          "views": 337,
+          "thumbnail_url": "https://i.ytimg.com/vi/0XURT2DMW4E/hqdefault.jpg",
+          "topic": "audio",
+          "language": "en",
+          "shows": "Search match: Redmi K40 no sound mic repair"
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Screen+Replacement/152594",
+          "title": "Xiaomi Poco F3 Screen Replacement",
+          "kind": "guide",
+          "shows": "iFixit repair guide (Moderate, 1 - 2 hours)"
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Rear+Glass+Replacement/152590",
+          "title": "Xiaomi Poco F3 Rear Glass Replacement",
+          "kind": "guide",
+          "shows": "iFixit repair guide (Moderate, 20 - 30 minutes)"
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+SIM+Card+Tray+Replacement/152790",
+          "title": "Xiaomi Poco F3 SIM Card Tray Replacement",
+          "kind": "guide",
+          "shows": "iFixit repair guide (Easy, 30 seconds - 1 minute)"
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Loudspeaker+Replacement/152592",
+          "title": "Xiaomi Poco F3 Loudspeaker Replacement",
+          "kind": "guide",
+          "shows": "iFixit repair guide (Moderate, 40 minutes - 1 hour)"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "wiki-en-1",
+          "url": "https://en.wikipedia.org/wiki/Redmi_K40",
+          "title": "Redmi K40",
+          "publisher": "Wikipedia",
+          "retrieved_at": "2026-11-21",
+          "supports": "The Redmi K40 is a line of Android-based smartphones manufactured by Xiaomi and marketed under its Redmi sub-brand. There are several models, the K40, K40 Pro, K40 Pro+, K40 Gaming and K40S. In the global market the Redmi K40 was launched as Poco F3 and the Redmi K40 Pro+ was launched as Xiaomi Mi 11i. In April 2021 the Redmi K40 and K40 Pro+ were released in India as Xiaomi Mi 11X and Mi 11X Pro. In July 2021 the Redmi K40 Gaming was released globally as Poco F3 GT. The Redmi K40S was released globally as Poco F4 but with improved specs.\n\n\n== Design ==\nThe front and back panels are made of Go"
+        },
+        {
+          "id": "ifixit-ifixit-1",
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Screen+Replacement/152594",
+          "title": "Xiaomi Poco F3 Screen Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiaomi Poco F3 Screen Replacement\nIf possible, turn on your device and test your repair before installing new adhesive and resealing.\n\nCompare your new replacement part to the original part—you may need to transfer remaining components or remove adhesive backings from the new part before installing.\n\n***To reassemble your device, follow these instructions in reverse order.***\n\nTake your e-waste to an [[E-Waste|R2 or e-Stewards certified recycler|new_window=true]].\n\nRepair didn’t go as planned? Try some [[Troubleshooting Problems After a Repair|basic troubleshooting]], or ask our [link|https://"
+        },
+        {
+          "id": "ifixit-ifixit-2",
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Rear+Glass+Replacement/152590",
+          "title": "Xiaomi Poco F3 Rear Glass Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiaomi Poco F3 Rear Glass Replacement\n***To reassemble your device, follow these instructions in reverse order.***\n\nRepair didn’t go as planned? Try some [[Troubleshooting Problems After a Repair|basic troubleshooting]], or ask our [link|https://www.ifixit.com/Answers?search=Poco+F3|Answers community] for help.\nTools: iOpener, Suction Handle, iFixit Opening Picks (Set of 6), Heat Gun, iFixit Adhesive Remover, Microfiber Cleaning Cloths, Isopropyl Alcohol (90% or Greater)\nParts: Precut Double-Sided Adhesive Card\n[https://www.ifixit.com/Guide/iOpener+Heating/25705|Prepare an iOpener|new_window=t"
+        },
+        {
+          "id": "ifixit-ifixit-3",
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+SIM+Card+Tray+Replacement/152790",
+          "title": "Xiaomi Poco F3 SIM Card Tray Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiaomi Poco F3 SIM Card Tray Replacement\n***To reassemble your device, follow the above steps in reverse order.***\nTools: SIM Card Eject Tool\nParts: \nInsert a SIM card eject tool or a paperclip into the small hole in the SIM card tray, located on the left bottom edge of the Poco F3.\nPress firmly to eject the tray.\nRemove the SIM card tray from the phone."
+        },
+        {
+          "id": "ifixit-ifixit-4",
+          "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Loudspeaker+Replacement/152592",
+          "title": "Xiaomi Poco F3 Loudspeaker Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiaomi Poco F3 Loudspeaker Replacement\nIf possible, turn on your device and test your repair before installing new adhesive and resealing.\n\n***To reassemble your device, follow these instructions in reverse order.***\n\nTake your e-waste to an [[E-Waste|R2 or e-Stewards certified recycler|new_window=true]].\n\nRepair didn’t go as planned? Try some [[Troubleshooting Problems After a Repair|basic troubleshooting]], or ask our [link|https://www.ifixit.com/Answers?search=Poco+F3|Answers community] for help.\nTools: SIM Card Eject Tool, iOpener, Suction Handle, iFixit Opening Picks (Set of 6), Heat Gun,"
+        },
+        {
+          "id": "ifixit-ifixit-5",
+          "url": "https://www.ifixit.com/Device/Poco_F3",
+          "title": "Poco F3",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Poco F3\nThe Xiaomi Poco F3 has a 6.67-inch AMOLED display with a refresh rate of 120 Hz and a touch sampling rate of 360 Hz. It is powered by the Snapdragon 870 5G. Released in March 2021."
+        },
+        {
+          "id": "ifixit-ifixit-6",
+          "url": "https://www.ifixit.com/Guide/Poco+F3+Battery+Replacement/152593",
+          "title": "Poco F3 Battery Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Poco F3 Battery Replacement\nIf possible, turn on your device and test your repair before installing new adhesive and resealing.\n\n***To reassemble your device, follow these instructions in reverse order.*** During reassembly apply new adhesive where necessary after cleaning the relevant areas with isopropyl alcohol (>90%).\n\nFor optimal performance, [[Battery Calibration|calibrate your newly installed battery|new_window=true]] after completing this guide.\n\nTake your e-waste to an [[E-Waste|R2 or e-Stewards certified recycler|new_window=true]].\n\nRepair didn’t go as planned? Try some [[Troubleshoo"
+        },
+        {
+          "id": "ifixit-ifixit-7",
+          "url": "https://www.ifixit.com/Answers/View/863971/Why+my+Poco+F3+always+stuck+in+logo",
+          "title": "Why my Poco F3 always stuck in logo?",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Why my Poco F3 always stuck in logo?\n"
+        },
+        {
+          "id": "ifixit-ifixit-8",
+          "url": "https://www.ifixit.com/Answers/View/930417/Mon+Poco+F3+chauffe,+ne+capte+pas+de+donn%C3%A9es+mobiles+et+red%C3%A9marre,+why",
+          "title": "Mon Poco F3 chauffe, ne capte pas de données mobiles et redémarre, why",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-21",
+          "supports": "Mon Poco F3 chauffe, ne capte pas de données mobiles et redémarre, why\n"
+        },
+        {
+          "id": "yt-d295ysg5c2y",
+          "url": "https://www.youtube.com/watch?v=D295ysg5c2Y",
+          "title": "POCO F3 GT Audio IC Circuit Repair | No Sound Problem Fix",
+          "publisher": "YouTube · mobilerepair",
+          "retrieved_at": "2026-11-21",
+          "supports": "#audioic #pocof3gt #xiaomirepair #mobilerepair #androidrepair #phonerepair #hardwarefix\n\nPOCO F3 GT audio not working? Learn the complete audio IC circuit repair solution for Xiaomi POCO F3 GT devices.\nWatch this professional technician-level repair tutorial to fix sound problems, speaker issues, and audio circuit faults fast.\n\nThis video covers POCO F3 GT audio circuit troubleshooting including no sound issue, microphone failure, loudspeaker problem, receiver fault, and audio IC hardware repair. Perfect for mobile repair technicians, Android hardware learners, and smartphone servicing profess"
+        },
+        {
+          "id": "yt-bzax0wfszca",
+          "url": "https://www.youtube.com/watch?v=BzaX0wfSZCA",
+          "title": "Xiaomi Poco F3 5G não funciona Microfone ViVA Voz - microfone chiando | Como Rssolver",
+          "publisher": "YouTube · MixTudo Assistencia Técnica",
+          "retrieved_at": "2026-11-21",
+          "supports": "Olá meus amigos,hoje tensos um poco F3 5G que fica com o microfone com ruídos. Neste vídeo iremos mostrar como efetuar este reparo passo a passo. Lembrando que a troca deste componente é feito na placa. Pois este modelo tem dois microfones."
+        },
+        {
+          "id": "yt-i9qbtyy2ubu",
+          "url": "https://www.youtube.com/watch?v=i9qBtYY2UBU",
+          "title": "Poco F3 Gt No Mic No ear Speak &Ringar Solution  Poco F3 Gt नो माइक नो ईयर स्पीकर और रिंगर सॉल्यूशन",
+          "publisher": "YouTube · AnsaarTech",
+          "retrieved_at": "2026-11-21",
+          "supports": "Poco F3 Gt No Mic No ear Speak &Ringar Solution  Poco F3 Gt नो माइक नो ईयर स्पीकर और रिंगर सॉल्यूशन Poco f3 speaker not working \nPoco F3 GT speaker cracking sound solution\nHow to repair poco f3 low / no sound solution\nPoco f3 gt mobile volume problem \nPoco f3 sound problem \nPoco f4 sound problem \nPoco F3 GT ringtone \nyour query ansaaralam751@gmail.com"
+        },
+        {
+          "id": "yt-twgluxaygig",
+          "url": "https://www.youtube.com/watch?v=TwGLuXAygig",
+          "title": "Xiaomi Poco F3 Audio Circuit Repair | No Sound Problem Fix Tutorial",
+          "publisher": "YouTube · mobilerepair",
+          "retrieved_at": "2026-11-21",
+          "supports": "#pocof3 #xiaomi #audiorepair #mobilerepair #nosoundfix #androidrepair #phonerepair\n\nXiaomi Poco F3 audio circuit repair with complete no sound troubleshooting and hardware diagnosis.\nWatch this before replacing speakers or audio IC components to fix Poco F3 sound problems professionally.\n\nIn this video, we demonstrate Xiaomi Poco F3 audio circuit testing, sound IC troubleshooting, speaker line diagnosis, and technician-level smartphone repair workflow. This repair guide is ideal for mobile technicians, repair shops, and Android users looking for advanced audio repair solutions.\n\nTopics covered"
+        },
+        {
+          "id": "yt-mp67uk7muek",
+          "url": "https://www.youtube.com/watch?v=mp67uK7mUEk",
+          "title": "Xiomi Poco F3 mic speaker Jumper Ways | Xiomi poco F3 mic speaker Problem Solution",
+          "publisher": "YouTube · India Technology",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiomi Poco F3 mic speaker Jumper Ways | Xiomi poco F3 mic speaker Problem Solution"
+        },
+        {
+          "id": "yt-0xurt2dmw4e",
+          "url": "https://www.youtube.com/watch?v=0XURT2DMW4E",
+          "title": "Xiaomi redmi K40 mic speaker Jumper Ways | redmi K40 mic speaker Problem Solution",
+          "publisher": "YouTube · India Technology",
+          "retrieved_at": "2026-11-21",
+          "supports": "Xiaomi redmi K40 mic speaker Jumper Ways | redmi K40 mic speaker Problem Solution"
+        }
+      ],
+      "review": {
+        "status": "agent_draft",
+        "agent": "FixIndex Autonomous Harness (deterministic-grounded)",
+        "notes": "Synthesized from 15 live sources for query: Xiaomi Poco F3 نه میکروفن و نه صدا کار میکنه. Pending technician verification."
+      }
+    }
+  },
+  "variants": [
+    {
+      "hardware_code": "M2012K11AC",
+      "market_region": "Global / Regional"
+    },
+    {
+      "hardware_code": "M2012K11AG",
+      "market_region": "Global / Regional"
+    },
+    {
+      "hardware_code": "M2012K11AI",
+      "market_region": "Global / Regional"
+    }
+  ],
+  "testpoints": [],
+  "provenance": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Redmi_K40",
+      "title": "Redmi K40",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Screen+Replacement/152594",
+      "title": "Xiaomi Poco F3 Screen Replacement",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Rear+Glass+Replacement/152590",
+      "title": "Xiaomi Poco F3 Rear Glass Replacement",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+SIM+Card+Tray+Replacement/152790",
+      "title": "Xiaomi Poco F3 SIM Card Tray Replacement",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Xiaomi+Poco+F3+Loudspeaker+Replacement/152592",
+      "title": "Xiaomi Poco F3 Loudspeaker Replacement",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Device/Poco_F3",
+      "title": "Poco F3",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Poco+F3+Battery+Replacement/152593",
+      "title": "Poco F3 Battery Replacement",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Answers/View/863971/Why+my+Poco+F3+always+stuck+in+logo",
+      "title": "Why my Poco F3 always stuck in logo?",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.ifixit.com/Answers/View/930417/Mon+Poco+F3+chauffe,+ne+capte+pas+de+donn%C3%A9es+mobiles+et+red%C3%A9marre,+why",
+      "title": "Mon Poco F3 chauffe, ne capte pas de données mobiles et redémarre, why",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=D295ysg5c2Y",
+      "title": "POCO F3 GT Audio IC Circuit Repair | No Sound Problem Fix",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=BzaX0wfSZCA",
+      "title": "Xiaomi Poco F3 5G não funciona Microfone ViVA Voz - microfone chiando | Como Rssolver",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=i9qBtYY2UBU",
+      "title": "Poco F3 Gt No Mic No ear Speak &Ringar Solution  Poco F3 Gt नो माइक नो ईयर स्पीकर और रिंगर सॉल्यूशन",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=TwGLuXAygig",
+      "title": "Xiaomi Poco F3 Audio Circuit Repair | No Sound Problem Fix Tutorial",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=mp67uK7mUEk",
+      "title": "Xiomi Poco F3 mic speaker Jumper Ways | Xiomi poco F3 mic speaker Problem Solution",
+      "captured_at": "2026-11-21T19:25:43Z"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=0XURT2DMW4E",
+      "title": "Xiaomi redmi K40 mic speaker Jumper Ways | redmi K40 mic speaker Problem Solution",
+      "captured_at": "2026-11-21T19:25:43Z"
+    }
+  ]
+}

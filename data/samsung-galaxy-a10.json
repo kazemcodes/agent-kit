@@ -1,0 +1,402 @@
+{
+  "schema_version": 1,
+  "device": {
+    "brand": "Samsung",
+    "model_family": "Galaxy A10",
+    "platform": "Android",
+    "slug": "samsung-galaxy-a10",
+    "release_year": 2019,
+    "board_identifier": "SM-A105F",
+    "aliases": ["SM-A105F", "SM-A105F/DS", "SM-A105FN", "SM-A105G", "SM-A105M", "A105F", "Galaxy A10"],
+    "specs": {
+      "cpu": "Samsung Exynos 7884 (14 nm): 2x1.6 GHz Cortex-A73 + 6x1.35 GHz Cortex-A53",
+      "gpu": "Mali-G71 MP2",
+      "display": "6.2 in IPS LCD, 720 x 1520 (19:9, ~271 ppi)",
+      "ram": "2 GB / 4 GB",
+      "storage": "32 GB eMMC 5.1, dedicated microSDXC slot (up to 512 GB)",
+      "battery": "3400 mAh Li-Ion, non-removable, micro-USB 2.0 (no fast charging)",
+      "os": "Android 9 Pie with One UI 1.1, upgradable to Android 11 with One UI 3.1",
+      "rear_camera": "13 MP f/1.9 AF, single, LED flash, 1080p30",
+      "front_camera": "5 MP f/2.0",
+      "sensors": "Accelerometer, proximity (no fingerprint sensor, no gyroscope, no compass)",
+      "connectivity": "Wi-Fi 802.11 b/g/n, Bluetooth 5.0, FM radio, GPS/GLONASS/Galileo/BDS, no NFC",
+      "dimensions": "155.6 x 75.6 x 7.9 mm, 168 g",
+      "water_resistance": "None - no IP rating on any SM-A105 variant",
+      "charging_port": "Micro-USB 2.0 on a separate charging board, not the main logic board"
+    },
+    "known_issues": [
+      "The micro-USB socket sits on a separate charging board. Swap that board first; hot-air reworking the connector is the fallback when the board is unobtainable.",
+      "A black screen on a phone that still vibrates, chimes, and charges points at the display chain, not the SoC. The service manual lists U7006, and bench reports implicate the display/backlight IC at U6009.",
+      "There is no fingerprint sensor on this model. Tickets that say 'fingerprint not working' are misdiagnosed; Face unlock depends on the front camera and proximity sensor.",
+      "Bootloops after an OTA or a failed Odin flash are common on eMMC 5.1 A10 units. Reflash matching CSC firmware in Download Mode before replacing the board.",
+      "No IP rating. Liquid contact corrodes the charging board and the shield-covered rails first, so intermittent charging after a spill is a board-level inspection, not a software fix."
+    ],
+    "schematic_url": null,
+    "profile": {
+      "verdict": "A 2019 budget Samsung whose two real bench failures are the micro-USB charging board and the display/backlight section. It is worth repairing while the board still boots: a charging board, a battery, or a panel is a straightforward job. Once a display rail is shorted or the eMMC no longer enumerates, the phone is usually a parts donor.",
+      "overview": "The Galaxy A10 is the 6.2-inch, 720p entry model of the 2019 A series, built on the Exynos 7884 with 2 or 4 GB of RAM and 32 GB of eMMC 5.1 storage. It has no fingerprint reader, no NFC, and no water resistance, so the failures that reach a bench are mechanical and electrical rather than waterproofing-related.\n\nTwo assemblies absorb most of the damage. The micro-USB socket lives on its own small charging board behind the lower shield, so a torn or corroded port is a board swap rather than a mainboard rework. The display is driven by a backlight/display power section that fails independently of the SoC: the phone still vibrates, plays the charging tone, and rings alarms with a completely dark panel. Servicing notes name U7006, while technicians who traced the rails point at U6009 and the backlight IC.\n\nBecause the panel is LCD, a cracked screen and a dead backlight look similar to the customer but not on the bench: a cracked panel usually still shows an image under a strong light, while a backlight failure shows nothing at all. Sorting those two before ordering parts is the single biggest time saver on this model.",
+      "failure_modes": [
+        {
+          "title": "Micro-USB charging board: worn socket, torn pads, or corrosion",
+          "severity": "common",
+          "confidence": "verified",
+          "components": ["Charging board", "Micro-USB socket", "Lower shield"],
+          "symptoms": [
+            "Charges only when the cable is held at an angle, or not at all",
+            "Cable wobbles; the phone drops out of charging when moved",
+            "Green/brown corrosion or a lifted socket visible under a loupe",
+            "Phone charges but a PC never sees it (data pins damaged)"
+          ],
+          "mechanism": "The micro-USB socket is soldered to a separate charging board under the lower shield, connected to the mainboard by flex. Repeated cable insertion fatigues the socket anchors, and liquid reaches this board first because it is closest to the port opening. Once a pad lifts or a data line corrodes, the fault is on that board, not in the charging circuit of the mainboard.",
+          "diagnose": [
+            "Inspect the socket pins and the board edge under magnification before disassembly; look for pushed-in pins, cracked solder, or green corrosion.",
+            "Try a known-good cable and charger, then a USB power meter: 0 A draw with a known-good charger points at the port or board, not the battery.",
+            "Open the back cover, remove the lower shield, and check the charging-board flex for tears or corrosion. A replacement board is the fastest confirmation.",
+            "If the phone charges but is not detected over USB, suspect the data pins on the same socket before chasing the SoC."
+          ],
+          "fix": "Replace the charging board. If the board is unavailable, iFixit's guide removes it and uses hot air to lift the micro-USB connector, then solders a new connector in place. A bench comment on that guide recommends buying the complete board instead: it is cheaper, faster, and avoids cooking the flex.",
+          "risk": "Hot air on the charging board can melt the flex and lift pads. Do not power the phone with the board removed and the battery still connected; isolate the battery first.",
+          "sources": ["ifixit-port", "ifixit-device"]
+        },
+        {
+          "title": "Black screen on a phone that is clearly alive",
+          "severity": "common",
+          "confidence": "community",
+          "components": ["U7006", "U6009", "Backlight IC", "Display flex"],
+          "symptoms": [
+            "Phone vibrates on power-up and plays the charging tone, but the panel stays dark",
+            "Alarms and notifications still fire",
+            "No image under a strong light (separates a dead backlight from a dark LCD)",
+            "Display rails measure wrong at the connector"
+          ],
+          "mechanism": "The display power section generates the panel rails independently of the SoC: LED_A_20V for the backlight string and VSN_5P5 / VSN_-5P5 / VDD_LCD_1P8 for the panel. When that section fails, the phone boots normally and is simply invisible. The SM-A105F service manual lists U7006 for reball/replacement; a technician who traced all four rails found them out of range and fixed the phone by reflowing or replacing the backlight IC, with U6009 and its surroundings as the suspected area.",
+          "diagnose": [
+            "Confirm the phone is alive: vibration, charging tone, alarm, or a call to the SIM. A dead board does none of these.",
+            "Shine a strong light at the panel at an angle. A faint image means the LCD is working and only the backlight is dead; no image at all points at the panel or its rails.",
+            "Reseat the display flex and test with a known-good panel before touching the board. A bad flex mimics a board fault exactly.",
+            "With the battery isolated and the board powered through a bench supply, measure LED_A_20V, VSN_5P5, VSN_-5P5, and VDD_LCD_1P8 at the display connector and compare with the service-manual values.",
+            "If a rail is open or shorted, inspect U7006 and the U6009 area for heat damage, corrosion, or a cracked joint."
+          ],
+          "fix": "Reflow or replace the backlight IC / U7006 per the service manual, or replace the display assembly when the panel itself is at fault. The resolved bench case was fixed by reflowing or replacing the backlight IC after all four rails measured out of range.",
+          "risk": "This is a shielded, thin board. Hot-air work near the display connector can shift nearby passives; do not attempt it without a stencil, flux, and a temperature profile. A wrong rail measurement with the battery connected can also damage the meter or the board.",
+          "sources": ["northridge-display", "ifixit-screen"]
+        },
+        {
+          "title": "Worn or swollen 3400 mAh battery",
+          "severity": "common",
+          "confidence": "verified",
+          "components": ["Battery", "Battery flex", "Back cover adhesive"],
+          "symptoms": [
+            "Battery drains within hours or shuts down under load",
+            "Back cover bulges or the panel lifts at one edge",
+            "Phone dies at 20-30% and restarts when charged",
+            "Bench supply shows the phone running fine without the cell"
+          ],
+          "mechanism": "The cell is adhesive-held and ages like any Li-Ion pack: capacity fades and internal resistance rises, so voltage sags under camera or radio load. A swollen cell pushes on the panel and back cover, which is a safety issue rather than a performance one.",
+          "diagnose": [
+            "Check for a bulge with a straight edge across the back cover before opening anything.",
+            "Run the phone from a bench supply with the cell disconnected to separate a battery fault from a board fault.",
+            "Inspect the battery flex and connector for corrosion or a loose seat after a liquid event.",
+            "Confirm charge current with a USB meter; a cell that accepts current but will not hold it is worn, not disconnected."
+          ],
+          "fix": "Replace the battery following iFixit's Galaxy A10 battery guide: 50 minutes to 2 hours, moderate difficulty, replacement adhesive required on reassembly.",
+          "risk": "Discharge below 25% before opening. Puncturing a swollen cell can cause a thermal event; never pry it with metal or compress it to fit.",
+          "sources": ["ifixit-battery", "ifixit-device"]
+        },
+        {
+          "title": "Cracked panel, or the wrong screen part ordered",
+          "severity": "common",
+          "confidence": "verified",
+          "components": ["Display assembly", "Frame", "Digitizer"],
+          "symptoms": [
+            "Glass cracked but the image and touch still work",
+            "Touch dead in a band or after a drop",
+            "New screen fitted but the frame does not sit flush",
+            "Image visible under light but no backlight"
+          ],
+          "mechanism": "The A10 uses an LCD assembly bonded to a plastic frame. iFixit's guide replaces the screen while keeping the original frame, but some replacement parts ship pre-installed in a new frame, which is a different procedure. Buying the wrong variant is the usual reason a repair stalls halfway.",
+          "diagnose": [
+            "Decide whether you are replacing the glass/panel only or a screen-plus-frame assembly, then order that exact part.",
+            "Test the new panel on the board before peeling adhesive, so a dead part does not get installed.",
+            "Check touch across the whole panel with a drawing app, not just the home screen.",
+            "If the image is present but dark, treat it as a backlight fault, not a panel fault."
+          ],
+          "fix": "Follow iFixit's Galaxy A10 screen guide for a screen-only swap, or the frame-transfer procedure if the part arrives pre-installed in a chassis. Discharge the battery below 25% first.",
+          "risk": "Prying a bonded LCD without heat or picks cracks the new panel. Reusing old adhesive lets the panel lift and breaks touch.",
+          "sources": ["ifixit-screen", "ifixit-device"]
+        },
+        {
+          "title": "Bootloop or dead boot after an OTA or failed Odin flash",
+          "severity": "occasional",
+          "confidence": "community",
+          "components": ["eMMC 5.1", "Bootloader", "PIT"],
+          "symptoms": [
+            "Samsung logo loop, or bootloop with no working recovery",
+            "Odin fails with SW REV CHECK FAIL (device/binary)",
+            "Phone only reaches Download Mode",
+            "Flashing completes but the phone still loops"
+          ],
+          "mechanism": "A interrupted flash or an OTA that writes a newer bootloader leaves the phone unable to boot the older image. Samsung's fused bootloader rejects firmware with a lower revision than the one already burned in, which is what the SW REV CHECK FAIL message reports. The storage itself is usually fine; the boot chain is inconsistent.",
+          "diagnose": [
+            "Enter Download Mode and confirm Odin sees a COM port. No COM port means a cable/driver problem or a dead boot section, not a firmware mismatch.",
+            "Read the Odin log: SW REV CHECK FAIL (device N, binary M) means the firmware is older than the fused bootloader, so flash equal or newer firmware.",
+            "Try a full four-file firmware with the matching CSC/PIT for the exact model code, not a file from another A10 variant.",
+            "If Odin completes and the phone still loops, test the eMMC path before replacing the mainboard."
+          ],
+          "fix": "Reflash the newest firmware for the exact model code (SM-A105F, SM-A105FN, SM-A105G, or SM-A105M) in Download Mode. Use a full firmware package when a normal flash fails. Only move to board-level storage work when a clean flash still fails.",
+          "risk": "Flashing another variant's firmware or the wrong CSC can break the baseband/IMEI. Never flash below the fused binary revision, and keep the phone on a charger for the whole write.",
+          "sources": ["xda-swrev"]
+        },
+        {
+          "title": "Liquid damage and corrosion under the shields",
+          "severity": "occasional",
+          "confidence": "community",
+          "components": ["Charging board", "Shields", "Connectors"],
+          "symptoms": [
+            "Intermittent charging or phantom touches weeks after a spill",
+            "Green/white residue around the port or under a shield",
+            "Phone works, then dies when it warms up",
+            "No boot at all after liquid reached the battery connector"
+          ],
+          "mechanism": "The A10 has no IP rating, so liquid reaches the charging board, the display flex, and the shield-covered rails directly. Corrosion grows between pads and under BGAs, which is why a phone can work for days after a spill and then fail.",
+          "diagnose": [
+            "Do not charge the phone. Open it, disconnect the battery, and inspect for residue before applying power.",
+            "Check the charging board and display connector first; both are at the edges where liquid enters.",
+            "Look under the shields for corrosion before deciding on a cleaning versus a board swap.",
+            "After cleaning, test current draw on a bench supply before fitting the battery."
+          ],
+          "fix": "Ultrasonic clean the board, replace corroded connectors and the charging board, and reflow only what the inspection justifies. Replace the battery if liquid reached the cell connector.",
+          "risk": "Powering a wet board turns corrosion into a short. Skip the rice and the hair dryer; heat drives residue deeper and warps the panel.",
+          "sources": ["ifixit-device"]
+        }
+      ],
+      "checks": [
+        {
+          "label": "Is the phone actually alive?",
+          "tool": "Ears and eyes",
+          "expect": "Vibration on power-up, charging tone, alarm, or a call to the SIM. Any of these means the SoC boots and a black screen is a display-chain fault.",
+          "sources": ["northridge-display"]
+        },
+        {
+          "label": "Charge current at the port",
+          "tool": "USB power meter",
+          "expect": "A known-good charger should show current draw within a few seconds. 0 A points at the socket, the charging board, or the battery connection; a high draw with no boot points at a shorted rail.",
+          "sources": ["ifixit-port"]
+        },
+        {
+          "label": "Display rail check at the connector",
+          "tool": "Multimeter / bench supply",
+          "expect": "LED_A_20V, VSN_5P5, VSN_-5P5, and VDD_LCD_1P8 should match the service-manual values. A dead or shorted rail moves the fault to U7006 / U6009 and the backlight section.",
+          "sources": ["northridge-display"]
+        },
+        {
+          "label": "Download Mode and Odin enumeration",
+          "tool": "Odin on Windows",
+          "expect": "The phone should enter Download Mode and appear as a COM port. No COM port means cable/driver or a dead boot section; SW REV CHECK FAIL means the firmware is older than the bootloader fuse.",
+          "sources": ["xda-swrev"]
+        },
+        {
+          "label": "Battery connector voltage",
+          "tool": "Multimeter",
+          "expect": "Measure at the battery connector before chasing the board. A deeply discharged or open cell makes a healthy phone look dead; a swollen cell is replaced, never recharged.",
+          "sources": ["ifixit-battery"]
+        }
+      ],
+      "error_codes": [
+        {
+          "code": "SW REV CHECK FAIL",
+          "tool": "Samsung Odin",
+          "meaning": "Odin refused the firmware because its bootloader revision is lower than the revision already fused into the phone. The message names the device revision and the binary being flashed, for example DEVICE: 3, BINARY: 2.",
+          "first_step": "Download the newest firmware for the exact model code (SM-A105F / FN / G / M) and flash again. Do not tick repartition or force a lower binary.",
+          "hardware_cause": "If the newest matching firmware still fails, the boot section or eMMC is suspect. Confirm the phone enumerates in Download Mode before considering board-level storage work.",
+          "sources": ["xda-swrev"]
+        }
+      ],
+      "battery": {
+        "capacity": "3400 mAh",
+        "chemistry": "Li-Ion, non-removable",
+        "connector": "Flex connector to the mainboard",
+        "adhesive": "The cell is adhesive-held; replacement adhesive is required on reassembly.",
+        "time_required": "50 minutes - 2 hours (moderate)",
+        "steps": [
+          "Discharge the battery below 25% before opening the phone.",
+          "Remove the SIM tray, then open the back cover as in iFixit's Back Cover guide.",
+          "Remove the shield screws and disconnect the battery flex before anything else.",
+          "Lift the cell with adhesive solvent and a non-metal pry tool; never compress or puncture a swollen pack.",
+          "Fit the new cell, reconnect the flex, and replace the adhesive before closing the phone."
+        ],
+        "risk": "A punctured or swollen Li-Ion cell can vent or catch fire. Discharge below 25%, work on a non-flammable surface, and do not reuse a deformed battery.",
+        "sources": ["ifixit-battery", "ifixit-device"]
+      },
+      "parts": [
+        {
+          "name": "Charging board (micro-USB)",
+          "type": "Board",
+          "note": "Preferred fix for a worn or corroded port. Confirm the flex and screw pattern match the SM-A105 variant before fitting."
+        },
+        {
+          "name": "Battery, 3400 mAh",
+          "type": "Consumable",
+          "note": "Replace when capacity has faded or the cell is swollen. Comes with a flex connector; no soldering."
+        },
+        {
+          "name": "Display assembly",
+          "type": "Assembly",
+          "note": "Screen-only and screen-preinstalled-in-frame versions both exist. Order the one your procedure expects."
+        },
+        {
+          "name": "Back cover adhesive",
+          "type": "Consumable",
+          "note": "Required whenever the back cover is removed; reusing old adhesive lets the cover lift and breaks the seal."
+        }
+      ],
+      "media": [
+        {
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Charging+Port+Replacement/147549",
+          "title": "iFixit - Galaxy A10 Charging Port Replacement",
+          "kind": "guide",
+          "shows": "Full teardown to the charging board, then hot-air removal of the micro-USB connector. 25 minutes, moderate."
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Battery+Replacement/133543",
+          "title": "iFixit - Galaxy A10 Battery Replacement",
+          "kind": "guide",
+          "shows": "The safe opening order and the adhesive work for the 3400 mAh cell. 50 minutes to 2 hours."
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Screen+Replacement/133953",
+          "title": "iFixit - Galaxy A10 Screen Replacement",
+          "kind": "guide",
+          "shows": "Screen-only replacement while keeping the frame, plus the warning about parts that arrive pre-installed in a chassis."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=BgN_dT4cud4",
+          "title": "Samsung Galaxy A10 Charging Port Replacement (video)",
+          "kind": "video",
+          "shows": "Real-time teardown and charging-board swap on an SM-A105F/DS, including the shield and flex handling."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=dZPRA-0wSE0",
+          "title": "Samsung A10 Black Screen / No Light (video)",
+          "kind": "video",
+          "shows": "Bench walkthrough of the no-backlight symptom on an A10, useful before measuring the display rails."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "gsmarena-a10",
+          "url": "https://www.gsmarena.com/samsung_galaxy_a10-9580.php",
+          "title": "Samsung Galaxy A10 - full phone specifications",
+          "publisher": "GSMArena",
+          "retrieved_at": "2026-11-19",
+          "supports": "Exynos 7884, 6.2-inch 720x1520 LCD, 2/4 GB RAM, 32 GB eMMC 5.1, 3400 mAh, micro-USB, Android 9 to Android 11, and the SM-A105F/FN/G/M version list."
+        },
+        {
+          "id": "wikipedia-a10",
+          "url": "https://en.wikipedia.org/wiki/Samsung_Galaxy_A10",
+          "title": "Samsung Galaxy A10",
+          "publisher": "Wikipedia",
+          "retrieved_at": "2026-11-19",
+          "supports": "Model naming and the separation of the Galaxy A10 (Exynos 7884) from the Galaxy A10s (MediaTek Helio P22)."
+        },
+        {
+          "id": "ifixit-port",
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Charging+Port+Replacement/147549",
+          "title": "Samsung Galaxy A10 Charging Port Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-19",
+          "supports": "The micro-USB socket lives on a separate charging board; the guide removes the board and hot-air swaps the connector in 25 minutes. A comment recommends replacing the whole board instead."
+        },
+        {
+          "id": "ifixit-battery",
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Battery+Replacement/133543",
+          "title": "Samsung Galaxy A10 Battery Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-19",
+          "supports": "3400 mAh cell replacement takes 50 minutes to 2 hours, is rated moderate, requires discharging below 25%, and needs fresh adhesive."
+        },
+        {
+          "id": "ifixit-screen",
+          "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Screen+Replacement/133953",
+          "title": "Samsung Galaxy A10 Screen Replacement",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-19",
+          "supports": "The screen can be replaced while keeping the frame, but some parts ship pre-installed in a new chassis and need a different procedure."
+        },
+        {
+          "id": "ifixit-device",
+          "url": "https://www.ifixit.com/Device/Samsung_Galaxy_A10",
+          "title": "Samsung Galaxy A10 Repair",
+          "publisher": "iFixit",
+          "retrieved_at": "2026-11-19",
+          "supports": "Confirms the SM-A105F / FN / G / M model list and indexes the back cover, battery, charging port, screen, SIM tray, and factory-reset guides."
+        },
+        {
+          "id": "northridge-display",
+          "url": "https://northridgefix.com/forum/repair/samsung-galaxy-a10-display-not-turning-on/",
+          "title": "[Solved] Samsung Galaxy A10 display not turning on",
+          "publisher": "Northridge Fix forum",
+          "retrieved_at": "2026-11-19",
+          "supports": "A resolved SM-A105F case: the phone booted with a dark panel, LED_A_20V / VSN_5P5 / VSN_-5P5 / VDD_LCD_1P8 measured out of range, the service manual listed U7006, and the fix was reflowing or replacing the backlight IC."
+        },
+        {
+          "id": "xda-swrev",
+          "url": "https://xdaforums.com/t/help-sw-rev-check-fail-device-3-binary-2.3218678/",
+          "title": "Help!! SW REV CHECK FAIL device 3 binary 2",
+          "publisher": "XDA Forums",
+          "retrieved_at": "2026-11-19",
+          "supports": "Explains the Odin SW REV CHECK FAIL message: the firmware being flashed has a lower bootloader revision than the one fused into the phone, so newer matching firmware is required."
+        }
+      ],
+      "review": {
+        "status": "agent_draft",
+        "agent": "FixIndex research agent",
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "notes": "Identity and specs checked against GSMArena and Wikipedia. Repair procedures from iFixit guides; display-rail diagnosis from a resolved Northridge Fix thread. Not yet checked by a second reviewer."
+      }
+    }
+  },
+  "variants": [
+    { "hardware_code": "SM-A105F", "market_region": "Global", "chipset": "Exynos 7884" },
+    { "hardware_code": "SM-A105F/DS", "market_region": "Global dual SIM", "chipset": "Exynos 7884" },
+    { "hardware_code": "SM-A105FN", "market_region": "Europe", "chipset": "Exynos 7884" },
+    { "hardware_code": "SM-A105G", "market_region": "APAC", "chipset": "Exynos 7884" },
+    { "hardware_code": "SM-A105M", "market_region": "LATAM / Brazil", "chipset": "Exynos 7884" }
+  ],
+  "testpoints": [],
+  "provenance": [
+    {
+      "url": "https://www.gsmarena.com/samsung_galaxy_a10-9580.php",
+      "title": "Samsung Galaxy A10 (SM-A105F) full specifications"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Samsung_Galaxy_A10",
+      "title": "Samsung Galaxy A10 - model numbers and hardware"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Charging+Port+Replacement/147549",
+      "title": "iFixit - Galaxy A10 micro-USB charging board replacement"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Battery+Replacement/133543",
+      "title": "iFixit - Galaxy A10 battery replacement"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/Samsung+Galaxy+A10+Screen+Replacement/133953",
+      "title": "iFixit - Galaxy A10 screen replacement"
+    },
+    {
+      "url": "https://www.ifixit.com/Device/Samsung_Galaxy_A10",
+      "title": "iFixit - Galaxy A10 repair index"
+    },
+    {
+      "url": "https://northridgefix.com/forum/repair/samsung-galaxy-a10-display-not-turning-on/",
+      "title": "Galaxy A10 display not turning on - U6009 / U7006 discussion"
+    },
+    {
+      "url": "https://xdaforums.com/t/help-sw-rev-check-fail-device-3-binary-2.3218678/",
+      "title": "XDA - Odin SW REV CHECK FAIL explained"
+    }
+  ]
+}
