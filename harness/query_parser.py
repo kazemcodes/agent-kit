@@ -38,7 +38,15 @@ _BRAND_CANONICAL = {
 
 _BRAND_WORDS = set(_BRAND_CANONICAL.keys())
 # Words that are both sub-brand triggers AND part of the model_family name.
-_SUBBRAND_KEEP_IN_MODEL = {"poco", "redmi", "galaxy", "iphone", "ipad", "pixel", "moto"}
+_SUBBRAND_KEEP_IN_MODEL = {
+    "poco", "پوکو",
+    "redmi", "ردمی",
+    "galaxy", "گلکسی",
+    "iphone", "ایفون",
+    "ipad", "ایپد",
+    "pixel", "پیکسل",
+    "moto",
+}
 
 _PERSIAN_MODEL_MAP = {
     "پوکو": "Poco",
@@ -62,7 +70,11 @@ _FA_CONVERSATION_STOPWORDS = {
     "داره", "دارد", "لطفا", "را", "رو", "به", "از", "در", "هم", "برای",
     "هیچ", "اصلا", "دیگه", "دیگ", "چطور", "چرا", "ایا", "بدون", "نداره",
     "قطع", "خراب", "بهم", "ریخته", "تعمیر", "چیه", "حل", "میتونی", "بگو",
-    "نیست", "میاد", "نمیاید", "نمیاد", "روی", "تو", "توی",
+    "نیست", "میاد", "نمیاید", "نمیاد", "روی", "تو", "توی", "روشن", "خاموش",
+    "میره", "میگرده", "برمیگرده", "میکشه", "نشون", "میده", "نمیده", "وقتی",
+    "موقع", "لحظه", "بعدش", "بعد", "اخرش", "سریع", "فقط", "ولی", "اما",
+    "ولت", "امپر", "میلی", "دهم", "اهم", "دیود", "سیستم", "کامپیوتر",
+    "شناخته", "شناسایی", "نمیشناسه", "میشناسه", "صدا", "تستر", "داریم",
 }
 
 _EN_CONVERSATION_STOPWORDS = {
@@ -72,15 +84,31 @@ _EN_CONVERSATION_STOPWORDS = {
     "fix", "repair", "help", "working", "work", "works", "does", "doesnt",
     "do", "cant", "can", "could", "you", "on", "in", "of", "to", "for",
     "at", "by", "from", "it", "its", "this", "that", "having", "has",
-    "have", "both", "all", "also", "too", "both", "dead", "broken",
-    "failed", "failing", "stopped", "completely",
+    "have", "both", "all", "also", "too", "dead", "broken",
+    "failed", "failing", "stopped", "completely", "when", "powered", "off",
+    "drops", "back", "then", "only", "shows", "reads", "unknown", "pc",
 }
 
 _FAULT_KEYWORDS: dict[str, list[str]] = {
     "mic": ["mic", "microphone", "میکروفن", "میکروفون", "میک"],
-    "sound": ["sound", "audio", "speaker", "earpiece", "loudspeaker", "ringtone", "codec", "صدا", "اسپیکر", "بلندگو", "بوق", "کپسول", "کدک"],
-    "no-power": ["no power", "not turning on", "dead boot", "short", "pmic", "0.0", "خاموش", "خاموشی", "روشن نمیشه", "روشن نمی", "اتصالی"],
-    "charging": ["charg", "not charging", "slow charging", "usb", "vbus", "tristar", "hydra", "moisture", "شارژ", "سوکت"],
+    "sound": ["sound", "audio", "speaker", "earpiece", "loudspeaker", "ringtone", "codec", "اسپیکر", "بلندگو", "بوق", "کپسول", "کدک", "صدا کار", "بدون صدا", "صدا نداره", "قطعی صدا"],
+    "no-power": ["no power", "not turning on", "dead boot", "no boot", "0.00a", "خاموشی", "روشن نمیشه", "روشن نمی", "روشن نمیشود", "اتصالی اصلی"],
+    "charging-fast": [
+        "fast charg", "turbo charg", "mi turbo", "quick charge", "9v", "11v", "2.5a",
+        "0.7a", "0.6a", "slow charg", "fake charg", "bq25968", "bq25970", "smb1390",
+        "فست شارژ", "فست", "توربو", "می توربو", "9 ولت", "فیک شارژ", "شارژ کند",
+        "پمپ شارژ", "0.7", "0.6", "2.5 امپر", "2 امپر", "7 دهم", "6 دهم",
+    ],
+    "charging": [
+        "charg", "not charging", "slow charging", "vbus", "tristar", "hydra",
+        "moisture", "ovp", "boot_cap", "شارژ", "سوکت شارژ", "شارژر",
+    ],
+    "usb-data": [
+        "unknown usb", "not recognized", "device descriptor", "usb_dm", "usb_dp",
+        "usb1_hs_dm", "usb1_hs_dp", "d-", "d+", "fsa4480", "u3402", "mtp",
+        "سیستم نمیشناسه", "کامپیوتر نمیشناسه", "شناسایی نمیکنه", "شناخته نمیشه",
+        "دی منفی", "دی مثبت", "دیتا", "پورت usb", "پورت یو اس بی", "یو اس بی",
+    ],
     "boot-loop": ["boot loop", "bootloop", "restart", "stuck on logo", "nv data", "بوت لوپ", "ریستارت", "لوگو", "روی ارم"],
     "display-backlight": ["backlight", "no light", "black screen", "no display", "display", "lcd", "oled", "بک لایت", "نور صفحه", "تصویر", "ال سی دی", "صفحه سیاه"],
     "touch": ["touch", "digitizer", "ghost touch", "تاچ", "لمس"],
@@ -88,12 +116,17 @@ _FAULT_KEYWORDS: dict[str, list[str]] = {
     "wifi-bt": ["wifi", "wi-fi", "bluetooth", "wlan", "وای فای", "وایفای", "بلوتوث"],
     "camera": ["camera", "flash", "دوربین"],
     "water-damage": ["water", "liquid", "corrosion", "اب خوردگی", "ابخوردگی", "سولفاته"],
-    "battery": ["battery", "swollen", "drain", "باتری", "باطری"],
+    "battery": ["battery", "swollen", "drain", "باتری", "باطری", "درصد باتری"],
     "sensors": ["sensor", "proximity", "fingerprint", "gyro", "سنسور", "اثر انگشت"],
     "overheating": ["overheat", "overheating", "thermal", "hot", "داغ", "حرارت"],
-    "storage-ufs-emmc": ["emmc", "ufs", "nand", "storage", "4013", "9", "pit"],
+    "storage-ufs-emmc": ["emmc", "ufs", "nand", "storage", "4013", "error 9", "itunes 9", "خطای 9", "pit file", "pit error"],
     "frp-unlock": ["frp", "unlock", "bypass", "mdm", "اف ار پی", "بای پس", "قفل"],
 }
+
+_DEVICE_POWERS_ON_HINTS = (
+    "گوشی روشن هست", "گوشی روشنه", "روشن هست", "روشن است", "روشن میشه",
+    "روشن میکنم", "powers on", "turns on", "boots normally", "boots fine",
+)
 
 _SINGLE_FAULT_TOKENS = {
     tok
@@ -130,8 +163,58 @@ _DEVICE_HINTS: dict[str, dict] = {
         "codename": "vayu",
         "siblings": ["Poco X3 Pro bhima"],
         "board_identifier": "M2102J20SG",
-        "aliases": ["M2102J20SG", "M2102J20SI", "vayu", "bhima", "پوکو X3 Pro"],
+        "aliases": ["M2102J20SG", "M2102J20SI", "vayu", "bhima", "پوکو X3 Pro", "پوکو X3 پرو"],
         "wikipedia_titles": ["Poco X3 Pro"],
+    },
+    "poco x3 nfc": {
+        "brand": "Xiaomi",
+        "model_family": "Poco X3 NFC",
+        "platform": "Android",
+        "codename": "surya",
+        "siblings": ["Poco X3 karna"],
+        "board_identifier": "M2007J20CG",
+        "aliases": ["M2007J20CG", "M2007J20CI", "surya", "karna"],
+        "wikipedia_titles": ["Poco X3"],
+    },
+    "mi 9t pro": {
+        "brand": "Xiaomi",
+        "model_family": "Mi 9T Pro",
+        "platform": "Android",
+        "codename": "raphael",
+        "siblings": ["Redmi K20 Pro"],
+        "board_identifier": "M1903F11G",
+        "aliases": ["M1903F11G", "M1903F11A", "M1903F11I", "raphael", "Redmi K20 Pro"],
+        "wikipedia_titles": ["Redmi K20"],
+    },
+    "redmi k20 pro": {
+        "brand": "Xiaomi",
+        "model_family": "Mi 9T Pro",
+        "platform": "Android",
+        "codename": "raphael",
+        "siblings": ["Mi 9T Pro"],
+        "board_identifier": "M1903F11A",
+        "aliases": ["M1903F11A", "M1903F11G", "M1903F11I", "raphael", "Mi 9T Pro"],
+        "wikipedia_titles": ["Redmi K20"],
+    },
+    "poco m3": {
+        "brand": "Xiaomi",
+        "model_family": "Poco M3",
+        "platform": "Android",
+        "codename": "citrus",
+        "siblings": ["Redmi 9T", "Redmi 9 Power"],
+        "board_identifier": "M2010J19CG",
+        "aliases": ["M2010J19CG", "M2010J19CI", "citrus"],
+        "wikipedia_titles": ["Poco M3"],
+    },
+    "redmi 9t": {
+        "brand": "Xiaomi",
+        "model_family": "Redmi 9T",
+        "platform": "Android",
+        "codename": "lime",
+        "siblings": ["Poco M3", "Redmi 9 Power"],
+        "board_identifier": "M2010J19SG",
+        "aliases": ["M2010J19SG", "M2010J19SY", "lime"],
+        "wikipedia_titles": ["Redmi 9T"],
     },
     "redmi k40": {
         "brand": "Xiaomi",
@@ -210,10 +293,26 @@ def _detect_error_codes(text: str) -> list[str]:
     return codes
 
 
+def _keyword_matches(keyword: str, norm_text: str) -> bool:
+    """Match a fault keyword safely without false substring hits on short terms (EN & FA)."""
+    if not keyword:
+        return False
+    # For short single-word tokens (e.g. 'mic', 'usb', 'ovp', '9v', 'd-', 'میک'),
+    # require word boundaries so 'mic' doesn't match 'ceramic' and 'میک' doesn't match 'نمیکنه'.
+    if len(keyword) <= 4 and " " not in keyword:
+        if keyword.isascii():
+            return bool(re.search(rf"(?<![a-z0-9]){re.escape(keyword)}(?![a-z0-9])", norm_text))
+        return bool(re.search(rf"(?<!\w){re.escape(keyword)}(?!\w)", norm_text))
+    return keyword in norm_text
+
+
 def _detect_faults(norm_text: str) -> list[str]:
     found: list[str] = []
-    has_mic = any(k in norm_text for k in _FAULT_KEYWORDS["mic"])
-    has_sound = any(k in norm_text for k in _FAULT_KEYWORDS["sound"])
+    has_mic = any(_keyword_matches(k, norm_text) for k in _FAULT_KEYWORDS["mic"])
+    has_sound = any(_keyword_matches(k, norm_text) for k in _FAULT_KEYWORDS["sound"])
+    # Avoid false positive 'sound' when user says "سیستم صدا میده" (PC chimes on USB connect)
+    if has_sound and any(p in norm_text for p in ("سیستم صدا میده", "کامپیوتر صدا میده", "pc chimes", "connect sound")):
+        has_sound = False
     if has_mic and has_sound:
         found.append("audio-mic-combined")
     if has_mic:
@@ -221,11 +320,19 @@ def _detect_faults(norm_text: str) -> list[str]:
     if has_sound:
         found.append("audio-sound")
 
+    powers_on = any(h in norm_text for h in _DEVICE_POWERS_ON_HINTS)
+
     for domain, keys in _FAULT_KEYWORDS.items():
         if domain in ("mic", "sound"):
             continue
-        if any(k in norm_text for k in keys):
+        if domain == "no-power" and powers_on:
+            continue
+        if any(_keyword_matches(k, norm_text) for k in keys):
             found.append(domain)
+
+    # Ensure charging-fast also carries the parent charging domain when relevant
+    if "charging-fast" in found and "charging" not in found:
+        found.append("charging")
 
     if not found:
         found.append("general")
@@ -239,7 +346,7 @@ def _extract_device_tokens(norm_text: str, explicit_device: str | None) -> tuple
     brand = ""
     model_tokens: list[str] = []
 
-    for tok in raw_tokens:
+    for idx, tok in enumerate(raw_tokens):
         if tok in _BRAND_CANONICAL:
             if not brand:
                 brand = _BRAND_CANONICAL[tok]
@@ -249,9 +356,20 @@ def _extract_device_tokens(norm_text: str, explicit_device: str | None) -> tuple
             continue
         if tok in _MODEL_STOP_TOKENS and not re.match(r"^(?:sm-|m\d{4}|a\d{4}|820-|f\d|x\d|a\d{2}|s\d{2})", tok):
             continue
-        # Strip standalone generic error codes like 4013 / 9008 from model name
+        # Strip standalone generic error codes and bench measurements (0.7, 9v, 2.5a, 0.6, 5v)
         if tok in {"4013", "4014", "9008"} or tok.startswith("0x"):
             continue
+        if not explicit_device:
+            if re.match(r"^\d+\.\d+[a-z]*$", tok, re.I):
+                continue
+            if re.match(r"^\d+(?:v|mv|a|ma|w|r|k|ohm|uf|nf|pf)$", tok, re.I):
+                continue
+            # Bare single/double digit not immediately following a known model word (like Note 10, iPhone 13)
+            if re.match(r"^\d{1,2}$", tok) and (
+                not model_tokens
+                or model_tokens[-1].lower() not in {"note", "iphone", "ipad", "pixel", "galaxy", "mi", "redmi", "poco", "oneplus", "mate", "nova"}
+            ):
+                continue
         mapped = _PERSIAN_MODEL_MAP.get(tok, tok)
         if not any("\u0600" <= ch <= "\u06ff" for ch in mapped):
             model_tokens.append(mapped)
@@ -301,7 +419,9 @@ def _symptom_labels(faults: list[str], explicit_symptom: str | None) -> tuple[st
         "audio-mic": ("microphone not working", "از کار افتادن میکروفون"),
         "audio-sound": ("no sound / speaker audio failure", "قطعی صدا و اسپیکر"),
         "no-power": ("no power / dead phone", "خاموشی کامل / روشن نشدن"),
+        "charging-fast": ("fast charging drops / slow charging", "افت فست‌شارژ / شارژ کند"),
         "charging": ("not charging / USB port failure", "مشکل شارژ نشدن"),
+        "usb-data": ("USB data / PC not recognizing device", "شناخته نشدن در کامپیوتر / عیب مسیر دیتا USB"),
         "boot-loop": ("bootloop / stuck on logo", "بوت لوپ / ماندن روی لوگو"),
         "display-backlight": ("no display / dead backlight", "نداشتن تصویر / خرابی بک‌لایت"),
         "touch": ("touchscreen not responding", "از کار افتادن تاچ"),
@@ -391,6 +511,39 @@ def parse_query(
         ])
         for sib in siblings[:1]:
             yt_queries.append(f"{sib} no sound mic repair")
+    elif "charging-fast" in faults or "charging" in faults or "usb-data" in faults:
+        if "usb-data" in faults:
+            web_queries.extend([
+                f'"{short_name}" USB not recognized OR "USB_DM" OR "D-" short repair',
+                f'"{short_name}" FSA4480 OR U3402 OR USB switch schematic',
+            ])
+        if "charging-fast" in faults or "charging" in faults:
+            web_queries.extend([
+                f'"{short_name}" fast charging drops OR slow charging repair solution',
+                f'"{short_name}" charging IC PM8150B OR BQ25968 OR BQ25970 OR SMB1390 schematic',
+                f'"{short_name}" not charging OVP BOOT_CAP repair.wiki OR ifixit OR reddit OR xdaforums',
+            ])
+        if board_identifier:
+            web_queries.append(f'"{board_identifier}" charging schematic IC')
+        for sib in siblings[:1]:
+            web_queries.append(f'"{sib}" charging IC fast charge repair')
+        yt_queries.extend([
+            f"{full_name} fast charging slow charging repair solution",
+            f"{short_name} charging ic problem solution",
+            f"{short_name} مشکل شارژ فست شارژ تعمیر",
+        ])
+    elif "no-power" in faults:
+        web_queries.extend([
+            f'"{full_name}" no power dead repair solution',
+            f'"{short_name}" no power PMIC OR CPU reball OR EDL 9008 schematic',
+            f'"{short_name}" dead no power reddit OR ifixit OR gsmhosting OR repair.wiki',
+        ])
+        if board_identifier:
+            web_queries.append(f'"{board_identifier}" no power schematic')
+        yt_queries.extend([
+            f"{full_name} dead no power repair",
+            f"{short_name} خاموشی تعمیر برد",
+        ])
     else:
         fault_kw = sym_en.split(",")[0]
         web_queries.extend([

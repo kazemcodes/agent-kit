@@ -4,8 +4,11 @@ __pycache__/
 *.py[cod]
 *.sqlite
 *.db
+*.session
+*.session-journal
 .crawl_ledger.db
 crawlers/config.json
 .env
 .env.*
 !.env.example
+mcp.json

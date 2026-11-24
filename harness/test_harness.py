@@ -154,6 +154,71 @@ class HarnessTest(unittest.TestCase):
                     self.assertEqual(hits, [])
                     self.assertIsNotNone(warn)
 
+    def test_persian_poco_x3_pro_fast_charge_and_usb_data_no_false_positives(self) -> None:
+        q = "یه پوکو X3 پرو داریم گوشی روشن هست، شارژش 0.7 هست یه لحظه میره روی فست و بعدش میره 9 ولت بعد برمیگرده روی 0.7"
+        parsed = parse_query(q)
+        self.assertEqual(parsed.brand, "Xiaomi")
+        self.assertEqual(parsed.model_family, "Poco X3 Pro")
+        self.assertEqual(parsed.slug, "xiaomi-poco-x3-pro")
+        self.assertIn("charging-fast", parsed.fault_domains)
+        self.assertIn("charging", parsed.fault_domains)
+        self.assertNotIn("storage-ufs-emmc", parsed.fault_domains)
+        self.assertNotIn("no-power", parsed.fault_domains)
+
+        q2 = "یک گوشی poco x3 pro دارم که میزنم توی شارژ میره روی ۹ ولت بعدش میاد روی ۶ دهم امپر سیستم صدا میده ولی دستگاه شناسایی نمیکنه دی منفی شرتی"
+        p2 = parse_query(q2)
+        self.assertIn("usb-data", p2.fault_domains)
+        self.assertIn("charging-fast", p2.fault_domains)
+        self.assertNotIn("audio-sound", p2.fault_domains)
+        self.assertNotIn("audio-mic", p2.fault_domains)
+        self.assertNotIn("storage-ufs-emmc", p2.fault_domains)
+
+    def test_extracts_charging_usb_ics_and_synthesizes_multi_tier_tree(self) -> None:
+        from collectors import _extract_variant_value
+
+        self.assertIn(
+            "Snapdragon 860",
+            _extract_variant_value("X3 NFC: Snapdragon 732G; X3 Pro: Snapdragon 860 (SM8150-AC)", "Poco X3 Pro"),
+        )
+
+        parsed = parse_query("Xiaomi Poco X3 Pro 9V fast charge drops to 0.6A and PC unknown USB device")
+        bundle = EvidenceBundle(
+            parsed=parsed,
+            items=[
+                EvidenceItem(
+                    id="web-schematic-1",
+                    source_type="web",
+                    url="https://example.org/poco-x3-pro-charging",
+                    title="Poco X3 Pro PM8150B-102 BQ25968 FSA4480 charging schematic",
+                    publisher="RepairBench",
+                    snippet="PM8150B-102 primary charger, BQ25968 fast-charge pump, FSA4480 USB switch, BOOT_CAP and USB1_HS_DM_DET.",
+                    full_text="Checked VPH_PWR, VBUS, BOOT_CAP, BATT_THERM, CONN_THERM, USB1_HS_DM_DET, PM8150B-102, BQ25968, and FSA4480.",
+                )
+            ],
+        )
+        facts = extract_facts(bundle)
+        self.assertIn("PM8150B-102", facts.ics)
+        self.assertIn("BQ25968", facts.ics)
+        self.assertIn("FSA4480", facts.ics)
+        self.assertIn("VPH_PWR", facts.rails)
+        self.assertIn("BOOT_CAP", facts.rails)
+        self.assertIn("USB1_HS_DM_DET", facts.rails)
+
+        res = synthesize_solution(bundle, engine="deterministic")
+        modes = res["device_payload"]["device"]["profile"]["failure_modes"]
+        self.assertEqual(len(modes), 3)
+        self.assertTrue(any("FSA4480" in m["title"] or "USB" in m["title"] for m in modes))
+        self.assertTrue(any("BQ25968" in m["title"] or "PM8150B" in m["title"] for m in modes))
+
+    def test_solve_loads_client_from_mcp_json_fallback(self) -> None:
+        from solve import _load_client
+
+        client = _load_client(None, dry_run=True)
+        self.assertIsNotNone(client)
+        assert client is not None
+        self.assertTrue(client.base_url.startswith("https://"))
+        self.assertIn("Bearer ", client.session.headers.get("Authorization", ""))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -24,15 +25,71 @@ from extractor import format_report, synthesize_solution  # noqa: E402
 from query_parser import parse_query  # noqa: E402
 
 
+def _read_dotenv_key(env_path: Path, keys: tuple[str, ...]) -> str:
+    if not env_path.exists():
+        return ""
+    try:
+        for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            if k.strip() in keys:
+                return v.strip().strip('"').strip("'")
+    except OSError:
+        return ""
+    return ""
+
+
 def _load_client(config_path: str | None, dry_run: bool) -> FixIndexClient | None:
+    # 1. Explicit --config or crawlers/config.json
     cfg_file = Path(config_path) if config_path else CRAWLERS_DIR / "config.json"
-    if not cfg_file.exists():
-        return None
-    cfg = load_config(str(cfg_file))
-    fx = cfg.get("fixindex") or {}
-    base_url = fx.get("base_url") or "http://127.0.0.1:8000"
-    api_key = fx.get("api_key") or ""
-    return FixIndexClient(base_url, api_key, dry_run=dry_run)
+    if cfg_file.exists():
+        cfg = load_config(str(cfg_file))
+        fx = cfg.get("fixindex") or {}
+        base_url = fx.get("base_url") or "http://127.0.0.1:8000"
+        api_key = fx.get("api_key") or ""
+        if api_key:
+            return FixIndexClient(base_url, api_key, dry_run=dry_run)
+
+    # 2. Environment variables / mcp.json / $HERMES_HOME/.env fallback
+    base_url = os.environ.get("FIXINDEX_URL", "").strip()
+    api_key = (
+        os.environ.get("FIXINDEX_API_KEY", "").strip()
+        or os.environ.get("MCP_FIXINDEX_API_KEY", "").strip()
+    )
+
+    mcp_file = HARNESS_DIR.parent / "mcp.json"
+    if mcp_file.exists():
+        try:
+            mcp_cfg = json.loads(mcp_file.read_text(encoding="utf-8"))
+            srv = (mcp_cfg.get("mcpServers") or {}).get("fixindex") or {}
+            mcp_url = str(srv.get("url") or "").strip()
+            if not base_url and mcp_url:
+                base_url = mcp_url.removesuffix("/api/v1/mcp").rstrip("/")
+            if not api_key:
+                auth = str((srv.get("headers") or {}).get("Authorization") or "").strip()
+                if auth.lower().startswith("bearer "):
+                    api_key = auth[7:].strip()
+        except Exception:  # noqa: BLE001
+            pass
+
+    if not api_key:
+        hermes_home = os.environ.get("HERMES_HOME", "").strip()
+        candidates = [
+            Path(hermes_home) / ".env" if hermes_home else None,
+            Path.home() / "AppData" / "Local" / "hermes" / ".env",
+            Path.home() / ".hermes" / ".env",
+        ]
+        for env_file in candidates:
+            if env_file:
+                api_key = _read_dotenv_key(env_file, ("FIXINDEX_API_KEY", "MCP_FIXINDEX_API_KEY"))
+                if api_key:
+                    break
+
+    if api_key:
+        return FixIndexClient(base_url or "https://kazemmoridi.ir", api_key, dry_run=dry_run)
+    return None
 
 
 def main() -> int:

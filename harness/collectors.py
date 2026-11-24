@@ -25,12 +25,15 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 
 _PREFERRED_DOMAINS = (
     "ifixit.com",
+    "repair.wiki",
+    "deviceinfohw.ru",
+    "techinsights.com",
+    "cpschematicx.com",
     "reddit.com",
     "xdaforums.com",
     "gsmhosting.com",
     "badcaps.net",
     "northridgefix.com",
-    "repair.wiki",
     "gsmarena.com",
     "hovatek.com",
     "xiaomi.eu",
@@ -39,6 +42,8 @@ _PREFERRED_DOMAINS = (
     "en.wikipedia.org",
     "electroniclinic.com",
     "mobilecellphonerepairing.com",
+    "onsemi.com",
+    "ti.com",
 )
 
 _BLOCKED_DOMAINS = (
@@ -62,7 +67,9 @@ _REPAIR_INTENT = [
     "audio", "mic", "microphone", "speaker", "sound", "no sound", "no audio",
     "codec", "wcd", "wsa", "pmic", "backlight", "baseband", "no service",
     "wifi", "diode", "schematic", "short", "ic", "cpu", "flex", "subboard",
-    "تعمیر", "مشکل", "حل شد", "خاموش", "شارژ", "بوت", "فلش", "باتری",
+    "fast charge", "slow charging", "turbo", "ovp", "boot_cap", "bq25968",
+    "bq25970", "smb1390", "fsa4480", "pm8150b", "usb_dm", "usb_dp",
+    "تعمیر", "مشکل", "حل شد", "خاموش", "شارژ", "فست شارژ", "توربو", "بوت", "فلش", "باتری",
     "صدا", "میکروفن", "میکروفون", "اسپیکر", "کدک", "سی پی یو", "ریبال",
     "تصویر", "بک لایت", "تاچ", "وای فای", "آنتن", "بیس باند", "دوربین", "آی سی",
 ]
@@ -185,7 +192,7 @@ def collect_wikipedia(parsed: ParsedQuery, scrubber: PIIScrubber) -> tuple[list[
                     full_text=extract[:6000],
                     fetched_full_page=True,
                 ))
-                specs = _parse_wiki_specs(extract, specs)
+                specs = _parse_wiki_specs(extract, specs, model_family=parsed.model_family)
                 # Also parse Wikipedia infobox HTML for exact chipset, release year, battery, display
                 try:
                     html_resp = session.get(
@@ -196,7 +203,7 @@ def collect_wikipedia(parsed: ParsedQuery, scrubber: PIIScrubber) -> tuple[list[
                     if html_resp.status_code == 200:
                         html_txt = ((html_resp.json().get("parse") or {}).get("text") or {}).get("*") or ""
                         if html_txt:
-                            specs = _parse_wiki_infobox(html_txt, specs)
+                            specs = _parse_wiki_infobox(html_txt, specs, model_family=parsed.model_family)
                 except Exception:  # noqa: BLE001
                     pass
         except Exception:  # noqa: BLE001
@@ -205,7 +212,24 @@ def collect_wikipedia(parsed: ParsedQuery, scrubber: PIIScrubber) -> tuple[list[
     return items, specs
 
 
-def _parse_wiki_infobox(html: str, existing: dict) -> dict:
+def _extract_variant_value(value: str, model_family: str) -> str:
+    """When a Wikipedia infobox cell lists multiple models (e.g. 'X3 NFC: Snapdragon 732G X3 Pro: Snapdragon 860'),
+    prefer the segment matching the target model_family."""
+    if not model_family or len(value) < 25:
+        return value
+    # Look for a variant tag like 'Pro:' or full model_family followed by ':'
+    tokens = model_family.split()
+    variant_hint = tokens[-1] if len(tokens) >= 2 else model_family
+    for pat in (rf"{re.escape(model_family)}\s*[:\-]\s*([^;\n]+)", rf"\b{re.escape(variant_hint)}\s*[:\-]\s*([^;\n]+)"):
+        m = re.search(pat, value, flags=re.I)
+        if m:
+            seg = m.group(1).strip()
+            if len(seg) >= 4:
+                return seg
+    return value
+
+
+def _parse_wiki_infobox(html: str, existing: dict, model_family: str = "") -> dict:
     specs = dict(existing)
     soup = BeautifulSoup(html, "html.parser")
     table = soup.find("table", class_="infobox")
@@ -220,35 +244,43 @@ def _parse_wiki_infobox(html: str, existing: dict) -> dict:
         v = re.sub(r"\[\d+\]", "", td.get_text(" ", strip=True)).strip()
         if not v:
             continue
+        v_var = _extract_variant_value(v, model_family)
         if "system on chip" in k or "chipset" in k or "soc" == k:
-            specs.setdefault("cpu", v[:180])
+            specs["cpu"] = v_var[:180]
         elif "memory" in k or k == "ram":
-            specs.setdefault("ram", v[:120])
+            specs.setdefault("ram", v_var[:120])
         elif "storage" in k:
-            specs.setdefault("storage", v[:160])
+            specs.setdefault("storage", v_var[:160])
         elif "battery" in k:
-            specs.setdefault("battery", v[:160])
+            specs.setdefault("battery", v_var[:160])
         elif "display" in k:
-            specs.setdefault("display", v[:180])
+            specs.setdefault("display", v_var[:180])
         elif "codename" in k:
-            specs.setdefault("codename", v[:80])
+            specs.setdefault("codename", v_var[:80])
         elif "model" in k or "related" in k:
             specs.setdefault("models_note", v[:200])
         elif "released" in k or "first released" in k:
-            m = re.search(r"\b(20\d{2})\b", v)
+            m = re.search(r"\b(20\d{2})\b", v_var)
             if m and "release_year" not in specs:
                 specs["release_year"] = int(m.group(1))
     return specs
 
 
-def _parse_wiki_specs(extract: str, existing: dict) -> dict:
+def _parse_wiki_specs(extract: str, existing: dict, model_family: str = "") -> dict:
     specs = dict(existing)
     if "release_year" not in specs:
         m = re.search(r"\b(201\d|202\d)\b", extract[:1200])
         if m:
             specs["release_year"] = int(m.group(1))
     if "cpu" not in specs:
-        m = re.search(r"(Snapdragon\s+[A-Za-z0-9\+]+|Exynos\s+[A-Za-z0-9]+|MediaTek\s+[A-Za-z0-9\s]+|Apple\s+A\d+\s*Bionic|Dimensity\s+\d+)", extract)
+        # Prefer a sentence that mentions the exact model_family (avoids shared-page sibling SoC)
+        search_region = extract
+        if model_family:
+            m_pos = re.search(re.escape(model_family), extract, flags=re.I)
+            if m_pos:
+                start = max(0, m_pos.start() - 100)
+                search_region = extract[start : m_pos.end() + 600] + "\n" + extract
+        m = re.search(r"(Snapdragon\s+[A-Za-z0-9\+]+|Exynos\s+[A-Za-z0-9]+|MediaTek\s+[A-Za-z0-9\s]+|Apple\s+A\d+\s*Bionic|Dimensity\s+\d+)", search_region)
         if m:
             specs["cpu"] = m.group(1).strip()
     return specs

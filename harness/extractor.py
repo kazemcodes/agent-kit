@@ -24,30 +24,52 @@ _KNOWN_IC_FUNCTIONS = {
     "WCD9380": "Qualcomm Aqstic Audio Codec (ADC/DAC)",
     "WCD9370": "Qualcomm Audio Codec",
     "WCD9341": "Qualcomm Audio Codec",
+    "WCD9340": "Qualcomm Aqstic Audio Codec",
     "WSA8830": "Qualcomm Smart Speaker Amplifier (SoundWire Class-D)",
     "WSA8835": "Qualcomm Smart Speaker Amplifier",
     "WSA8815": "Qualcomm Smart Speaker Amplifier",
     "PM8250": "Qualcomm Main PMIC & power rails",
     "PM8150": "Qualcomm Main PMIC",
+    "PM8150B": "Qualcomm Primary Charger PMIC & USB-C/PD Controller",
+    "PM8150B-102": "Qualcomm Primary Charger PMIC & USB-C/PD Controller",
+    "PM8150L": "Qualcomm Sub PMIC (VREG_BOB, Display/Backlight)",
     "PM8350": "Qualcomm Main PMIC",
+    "PM8350B": "Qualcomm Primary Charger PMIC & USB-C/PD Controller",
+    "PM8350C": "Qualcomm Sub PMIC (Display/Backlight/Flash)",
     "PM8550": "Qualcomm Main PMIC",
     "PMI8998": "Qualcomm Interface / Charging PMIC",
-    "SMB1390": "Qualcomm Fast Charge Pump IC",
-    "SMB1396": "Qualcomm Fast Charge Pump IC",
+    "SMB1390": "Qualcomm 2:1 Fast Charge Pump IC",
+    "SMB1396": "Qualcomm 2:1 Fast Charge Pump IC",
+    "BQ25968": "TI 2:1 Switched-Cap Fast Charge Pump IC (33W / 9V Turbo Charge)",
+    "BQ25970": "TI 2:1 Switched-Cap Fast Charge Pump IC",
+    "BQ25980": "TI 2:1 Switched-Cap Fast Charge Pump IC",
+    "SC8551": "Southchip 2:1 Switched-Cap Fast Charge Pump IC",
+    "LN8000": "Lion Semi 2:1 Switched-Cap Fast Charge Pump IC",
+    "FSA4480": "ON Semi USB Type-C Analog Audio & USB 2.0 Data Switch IC",
+    "FSA4476": "ON Semi USB Type-C Analog Audio & USB 2.0 Data Switch IC",
+    "ET7480": "USB Type-C Analog Audio & Data Switch IC",
+    "WAS4780": "USB Type-C Analog Audio & Data Switch IC",
     "SM8250": "Qualcomm Snapdragon 865/870 SoC (CPU/DSP/Audio Bus Host)",
+    "SM8250-AC": "Qualcomm Snapdragon 870 SoC (CPU/DSP/Audio Bus Host)",
     "SM8150": "Qualcomm Snapdragon 855/860 SoC",
+    "SM8150-AC": "Qualcomm Snapdragon 860 SoC",
+    "SM8350": "Qualcomm Snapdragon 888 SoC",
     "SM8450": "Qualcomm Snapdragon 8 Gen 1 SoC",
     "SDR865": "Qualcomm RF Transceiver",
     "SDR8150": "Qualcomm RF Transceiver",
+    "WCN3998": "Qualcomm Wi-Fi / Bluetooth IC",
+    "WCN3990": "Qualcomm Wi-Fi / Bluetooth IC",
+    "WCN6851": "Qualcomm Wi-Fi 6 / Bluetooth IC",
     "QET6100": "Qualcomm Envelope Tracker",
 }
 
 _IC_PATTERNS = [
     r"\bSM\d{4}(?:-AC)?\b",
     r"\bSDM\d{3}\b",
-    r"\bPM[IKL]?\d{4}[A-Z0-9]{0,2}\b",
+    r"\bPM[IKL]?\d{4}[A-Z0-9]{0,2}(?:-\d{3})?\b",
     r"\bWCD\d{4}\b",
     r"\bWSA\d{4}\b",
+    r"\bWCN\d{4}\b",
     r"\bSDR\d{3,4}\b",
     r"\bQET\d{4}\b",
     r"\bSMB\d{4}\b",
@@ -57,7 +79,12 @@ _IC_PATTERNS = [
     r"\bTAS25\d+\b",
     r"\bTFA98\d+\b",
     r"\bAW88\d+\b",
-    r"\bBQ25\d+\b",
+    r"\bBQ25\d{3}\b",
+    r"\bSC85\d{2}\b",
+    r"\bLN80\d{2}\b",
+    r"\bFSA44\d{2}\b",
+    r"\bET7480\b",
+    r"\bWAS4780\b",
     r"\bCD321\d[A-Z0-9]*\b",
     r"\bSN2\d{3}[A-Z0-9]*\b",
     r"\b161\dA\d\b",
@@ -69,7 +96,18 @@ _RAIL_PATTERNS = [
     r"\bVREG_[A-Z0-9_]{2,}\b",
     r"\bPP[0-9A-Z_]{3,}\b",
     r"\bVBUS(?:_[A-Z0-9_]+)?\b",
+    r"\bVPH_PWR\b",
+    r"\bVBATT?(?:_[A-Z0-9_]+)?\b",
     r"\bVSYS\b",
+    r"\bUSB1?_HS_D[PM](?:_DET)?\b",
+    r"\bUSB_D[PM]\b",
+    r"\bBOOT_CAP\b",
+    r"\bBATT_THERM\b",
+    r"\bCONN_THERM\b",
+    r"\bBATT_IDD?\b",
+    r"\bIBATT_SENSE_[PM]\b",
+    r"\bOVP_DRIVE\b",
+    r"\bDBG_UART_(?:TX|RX)\b",
     r"\bMIC\d?_BIAS\b",
     r"\bSOUNDWIRE\b",
     r"\bI2C\d*\b",
@@ -77,13 +115,15 @@ _RAIL_PATTERNS = [
 ]
 
 _CONCEPT_KEYWORDS = {
-    "software_cit": ["cit", "6484", "safe mode", "google app", "assistant", "hyperos", "miui", "volte", "firmware", "reboot", "restart"],
-    "subboard_flex": ["sub-board", "subboard", "sub board", "charging board", "flex", "ribbon", "fpc", "bottom mic", "sub mic", "connector"],
+    "software_cit": ["cit", "6484", "safe mode", "google app", "assistant", "hyperos", "miui", "volte", "firmware", "reboot", "restart", "fastboot"],
+    "subboard_flex": ["sub-board", "subboard", "sub board", "charging board", "flex", "ribbon", "fpc", "bottom mic", "sub mic", "connector", "j1500"],
     "audio_codec": ["wcd", "wsa", "codec", "audio ic", "amplifier", "soundwire", "earpiece", "loudspeaker", "speaker"],
-    "pmic_rails": ["pmic", "pm8", "ldo", "vreg", "vsys", "short", "diode", "multimeter"],
-    "cpu_reball": ["reball", "reflow", "bga", "cpu", "soc", "squeeze", "solder", "crack", "sm8250", "snapdragon 870"],
+    "pmic_rails": ["pmic", "pm8", "ldo", "vreg", "vsys", "vph_pwr", "short", "diode", "multimeter"],
+    "cpu_reball": ["reball", "reflow", "bga", "cpu", "soc", "squeeze", "solder", "crack", "sm8250", "sm8150", "snapdragon 870", "snapdragon 860"],
     "water_corrosion": ["water", "liquid", "corrosion", "moisture", "ultrasonic", "rust"],
-    "charging_port": ["charging", "usb-c", "vbus", "cc1", "cc2", "ovp", "tristar", "hydra"],
+    "charging_port": ["charging", "usb-c", "vbus", "cc1", "cc2", "ovp", "tristar", "hydra", "boot_cap", "bq25968", "bq25970", "smb1390", "pm8150b"],
+    "usb_switch": ["fsa4480", "fsa4476", "u3402", "usb_dm", "usb_dp", "usb1_hs_dm", "dbg_uart", "not recognized", "unknown usb"],
+    "battery_sense": ["battery", "batt_therm", "conn_therm", "batt_id", "ibatt_sense", "internal resistance", "percentage"],
     "display_backlight": ["backlight", "black screen", "no light", "vsn", "vsp", "oled", "lcd"],
     "baseband_rf": ["baseband", "no service", "modem", "qcn", "transceiver", "sdr"],
     "boot_storage": ["bootloop", "boot loop", "ufs", "emmc", "nand", "4013", "edl", "9008", "sahara"],
@@ -353,6 +393,175 @@ def _synthesize_failure_modes(bundle: EvidenceBundle, facts: ExtractedFacts) -> 
             + (f" ({soc_ics[0]})" if soc_ics else "")
             + ". Always isolate software (CIT *#*#6484#*#*) and the bottom flex before applying hot air to the mainboard."
         )
+
+    elif "charging-fast" in faults or "charging" in faults or "usb-data" in faults:
+        chg_ics = [ic for ic in detected_ic_list if ic.startswith(("PM8", "PMI", "BQ25", "SMB", "SC85", "LN80"))]
+        usb_ics = [ic for ic in detected_ic_list if ic.startswith(("FSA", "ET74", "WAS47"))]
+        sw_srcs = _pick_sources(bundle, cs["software_cit"], all_ev_ids)
+        sub_srcs = _pick_sources(bundle, cs["subboard_flex"], cs["charging_port"], all_ev_ids)
+        bat_srcs = _pick_sources(bundle, cs["battery_sense"], cs["charging_port"], all_ev_ids)
+        ic_srcs = _pick_sources(bundle, cs["charging_port"], cs["pmic_rails"], all_ev_ids)
+        usb_srcs = _pick_sources(bundle, cs["usb_switch"], cs["charging_port"], all_ev_ids)
+
+        modes.append({
+            "title": f"Main interconnect flex, USB-C sub-board, or degraded battery voltage sag ({p.model_family})",
+            "severity": "common",
+            "confidence": "community",
+            "components": ["USB-C Sub-board", "Main Interconnect Flex", "B2B Connector", "OEM Battery"],
+            "symptoms": [
+                "Charging negotiates 9V / fast charge momentarily or climbs to ~2A then collapses to 5V / 0.6–0.7A",
+                "Battery percentage jumps erratically under charge or load",
+                "Normal 5V port charges more reliably than a fast charger",
+            ],
+            "mechanism": "High contact resistance across the USB-C sub-board or main-to-sub flex causes VBUS sag under 9V/2A load, while a degraded battery with high internal resistance spikes VBATT toward 4.4V as soon as high current flows—triggering charger AICL/OVP cutoff back to ~0.6–0.7A.",
+            "diagnose": [
+                "Check battery temperature in CIT (*#*#6484#*#*) and perform a clean Fastboot reboot to rule out thermal/OS throttling.",
+                "Test with a known-good OEM charger/cable (bypassing 4-pin USB testers that block 5-pin Mi Turbo negotiation).",
+                "Swap with a known-good OEM battery, USB-C sub-board, and main interconnect flex; inspect B2B VBUS and CONN_THERM pins under a microscope.",
+                "Measure VBUS on the mainboard side during the 2A/9V peak—a drop below ~4.5V confirms flex/sub-board or OVP resistance.",
+            ],
+            "fix": "Replace the degraded battery, damaged main interconnect flex, or corroded USB-C sub-board; repair burnt B2B VBUS/CONN_THERM pins.",
+            "risk": "Disconnect the battery connector before unplugging or probing board-to-board flex cables.",
+            "sources": sub_srcs,
+        })
+
+        if "usb-data" in faults:
+            modes.append({
+                "title": f"Active USB D+/D- switch or UART/Audio mux pull-down when powered ON ({', '.join(usb_ics[:2]) if usb_ics else 'USB-C Switch / UART Mux'})",
+                "severity": "occasional",
+                "confidence": "community",
+                "components": usb_ics[:2] if usb_ics else ["USB-C Data/Audio/UART Switch IC", "Series D+/D- Resistors"],
+                "symptoms": [
+                    "PC plays USB connect chime but fails to enumerate device (Unknown USB Device)",
+                    "USB tester reads normal D- diode/resistance when powered OFF, but 0 ohm (short) when powered ON",
+                    "EDL 9008 may still enumerate even when Android/MTP fails",
+                ],
+                "mechanism": "When D- is healthy powered OFF, passive ESD diodes/ports are not shorted. Under power, an active USB-C audio/UART switch (e.g. FSA4480 or DBG_UART mux) mis-routes D- to AGND/UART, breaking USB enumeration and QC negotiation. Never inject voltage into a live active short.",
+                "diagnose": [
+                    "Test EDL 9008 and Fastboot enumeration first: if 9008 enumerates, the SoC USB PHY and physical D+/D- traces are intact.",
+                    "Remove the USB-C/UART switch IC and bridge the factory 0-ohm bypass pads (DP/DM) to test if the active D- short clears.",
+                    "If D- remains pulled low on the mainboard side, lift the charger-detect series resistor (USB_DM_DET) to separate the charger PMIC from the SoC USB_HS_DM pin.",
+                ],
+                "fix": "Replace the faulty USB switch IC (or bridge factory DP/DM bypass pads for UART-only debug muxes); if the phone enumerates as the model name in Windows taskbar, switch Android USB mode from Charging to File Transfer.",
+                "risk": "Never inject voltage onto a D+/D- line that measures normal when OFF—it will destroy the USB switch, audio codec, or SoC USB PHY.",
+                "sources": usb_srcs,
+            })
+
+        modes.append({
+            "title": f"9V Fast-Charge Pump, OVP MOSFET, Current-Sense, or Primary Charger PMIC Fault ({', '.join(chg_ics[:3]) if chg_ics else 'Charger PMIC / Charge Pump'})",
+            "severity": "occasional",
+            "confidence": "community",
+            "components": chg_ics[:4] if chg_ics else ["Primary Charger PMIC", "2:1 Fast Charge Pump IC", "OVP MOSFET", "Current-Sense Resistor"],
+            "symptoms": [
+                "Phone charges steadily on a basic 5V port but drops to 0.6–0.7A whenever 9V/2A fast charging starts",
+                "Fault persists after swapping known-good OEM battery, sub-board, and main interconnect flex",
+            ],
+            "mechanism": "At 9V/Turbo switchover, charging hands off from the primary charger PMIC to the 2:1 switched-cap charge pump and external OVP FET. Leaky flying capacitors, a failed OVP FET, a high-resistance battery current-sense resistor, or a weak charger inductor/PMIC trips protection and falls back to 5V/0.6–0.7A.",
+            "diagnose": [
+                "Measure VBUS before and after the OVP MOSFET during the 2A peak to confirm whether OVP is dropping voltage.",
+                "Inspect flying capacitors and PMID/VBUS caps around the 2:1 charge pump IC for shorts or leakage; test removing the charge pump IC to verify stable 5V charging.",
+                "Verify battery current-sense resistor continuity and main charger PMIC BOOT_CAP (non-grounded: ~7–9V on one side vs ~3–4V on VPH side) and main buck inductor.",
+            ],
+            "fix": "Replace faulty OVP MOSFET, shorted flying caps, or cracked current-sense resistor; reball or replace the 2:1 fast-charge pump IC or primary charger PMIC if 5V/9V regulation fails.",
+            "risk": "Shield adjacent underfilled SoC/RAM BGA packages from excess hot-air heat during charger IC rework.",
+            "sources": ic_srcs,
+        })
+
+        checks = [
+            {
+                "label": "CIT battery temperature & known-good OEM battery / flex swap",
+                "tool": "CIT (*#*#6484#*#*) + Known-good Battery/Flex",
+                "expect": "Ambient battery temperature (~25–35C) and stable percentage without sudden jumps under 2A charge load.",
+                "sources": bat_srcs[:2],
+            },
+            {
+                "label": "Mainboard VBUS & OVP voltage drop check at 2A / 9V peak",
+                "tool": "Digital Multimeter (DCV) + USB Volt/Amp Meter",
+                "expect": "Mainboard VBUS stays above ~4.6V (5V mode) / ~8.5V (9V mode) without collapsing across J1500 or OVP.",
+                "sources": sub_srcs[:2],
+            },
+            {
+                "label": "EDL 9008 / Fastboot & USB switch isolation (for PC recognition faults)",
+                "tool": "USB Tester + Multimeter (Diode Mode)",
+                "expect": "EDL 9008 enumeration proves CPU USB PHY is intact; removing USB/UART switch clears active D- pull-down.",
+                "sources": usb_srcs[:2],
+            },
+        ]
+        parts = [
+            {"name": "Known-good OEM battery pack", "type": "Battery", "note": "Rules out high internal resistance and erratic percentage jumps."},
+            {"name": "Main interconnect flex & USB-C sub-board", "type": "Flex / Board", "note": "Eliminates VBUS sag and CONN_THERM faults under fast-charge load."},
+            {"name": f"Charger / Fast-Charge Pump IC ({chg_ics[0]})" if chg_ics else "Charger PMIC / 2:1 Charge Pump IC", "type": "IC", "note": "Rework only after battery, flex, and OVP voltage checks pass."},
+        ]
+        verdict = (
+            f"On {p.brand} {p.model_family}, fast-charge drops (9V/2A -> 5V/0.6–0.7A)"
+            + (" with PC USB recognition failure" if "usb-data" in faults else "")
+            + " should be isolated in strict order: OEM battery/flex/VBUS sag check, EDL 9008 & USB switch isolation, then 2:1 fast-charge pump / OVP / primary charger PMIC"
+            + (f" ({', '.join(chg_ics[:3])})" if chg_ics else "")
+            + "."
+        )
+
+    elif "no-power" in faults:
+        pmic_ics = [ic for ic in detected_ic_list if ic.startswith(("PM", "S2M", "MT63"))]
+        soc_ics = [ic for ic in detected_ic_list if ic.startswith(("SM", "SDM", "MT6", "MT8"))]
+        pwr_srcs = _pick_sources(bundle, cs["pmic_rails"], cs["boot_storage"], all_ev_ids)
+        cpu_srcs = _pick_sources(bundle, cs["cpu_reball"], all_ev_ids)
+        modes = [
+            {
+                "title": f"Primary rail short (VPH_PWR / VSYS) or PMIC secondary LDO/buck short ({', '.join(pmic_ics[:2]) if pmic_ics else 'PMIC'})",
+                "severity": "common",
+                "confidence": "community",
+                "components": pmic_ics[:3] if pmic_ics else ["Main PMIC", "VPH_PWR Rail", "Decoupling Capacitors"],
+                "symptoms": [
+                    "Phone will not power on; DC bench supply shows immediate high standby current before pressing power or spikes and drops on prompt-to-boot",
+                ],
+                "mechanism": "A shorted ceramic decoupling capacitor on VPH_PWR/VSYS or a PMIC buck/LDO rail prevents power sequencing from completing.",
+                "diagnose": [
+                    "Measure standby current draw on a DC bench power supply (4.0V, 2A limit) before and after pressing power.",
+                    "Check VPH_PWR and PMIC buck inductors in diode mode / resistance for dead shorts to ground.",
+                    "Use rosin vapor or thermal camera with controlled low-voltage current injection (<=1V on secondary rails, <=4V on VPH_PWR) to locate the hot component.",
+                ],
+                "fix": "Remove and replace the shorted capacitor or replace the faulty PMIC if the short sits inside the IC.",
+                "risk": "Never exceed the rail's nominal voltage during current injection.",
+                "sources": pwr_srcs,
+            },
+            {
+                "title": f"SoC / stacked PoP RAM BGA solder fatigue or EDL 9008 hang ({', '.join(soc_ics[:2]) if soc_ics else 'SoC / RAM BGA'})",
+                "severity": "occasional",
+                "confidence": "community",
+                "components": soc_ics[:2] if soc_ics else ["SoC / CPU", "PoP RAM", "UFS Storage"],
+                "symptoms": [
+                    "No power / no display, low steady USB draw (~100–200mA), or phone drops straight to Qualcomm EDL 9008",
+                    "All primary and secondary PMIC rails measure clean without shorts",
+                ],
+                "mechanism": "Thermal cycling fatigues lead-free BGA joints under the SoC or stacked RAM, preventing DRAM/UFS initialization during boot.",
+                "diagnose": [
+                    "Connect to PC and check Device Manager for automatic Qualcomm HS-USB QDLoader 9008 or MediaTek BROM enumeration.",
+                    "Verify PMIC buck voltages (VDD_CORE, VDD_MEM, 1.8V) are present on prompt-to-boot before condemning SoC BGA joints.",
+                ],
+                "fix": "Lift, clean, and reball the SoC and stacked PoP RAM with leaded solder paste after backing up any recoverable data.",
+                "risk": "High-risk BGA rework: control preheat and underfill removal to avoid pad tear or PCB blistering.",
+                "sources": cpu_srcs,
+            },
+        ]
+        checks = [
+            {
+                "label": "DC bench supply standby & prompt-to-boot current signature",
+                "tool": "DC Bench Power Supply (4.0V)",
+                "expect": "0mA standby; steady ramp on power button press. High standby = VPH_PWR short; ~150–200mA hang + 9008 = SoC/RAM/UFS.",
+                "sources": pwr_srcs[:2],
+            },
+            {
+                "label": "VPH_PWR & PMIC buck coil diode-mode check",
+                "tool": "Multimeter (Diode / Continuity)",
+                "expect": "No 0.000V dead shorts on primary VPH_PWR or PMIC buck rails.",
+                "sources": pwr_srcs[:2],
+            },
+        ]
+        parts = [
+            {"name": f"Main PMIC ({pmic_ics[0]})" if pmic_ics else "Main PMIC", "type": "IC", "note": "Verify shorted caps first before replacing PMIC."},
+            {"name": "BGA CPU/RAM Reball Stencil & 183°C Paste", "type": "Consumable", "note": "Required when PMIC rails are clean and device hangs in EDL 9008."},
+        ]
+        verdict = f"On {p.brand} {p.model_family}, diagnose no-power faults by DC bench current signature and PC EDL/BROM detection first: isolate VPH_PWR/PMIC shorts before attempting SoC/RAM BGA reballing."
 
     else:
         # Generic multi-tier fault dossier grounded in collected evidence for ANY other fault domain
